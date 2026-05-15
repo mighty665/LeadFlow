@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>LeadFlow CRM</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"/>
+<style>
+/* ─── Reset ─────────────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px}
+input,textarea,select,button{font-family:inherit;font-size:13px}
+button{cursor:pointer}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:#d0d0c8;border-radius:3px}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ─── CSS Variables ─────────────────────────────────────── */
+:root{
+  --bc:#5B6EF5;
+  --bc-light:rgba(91,110,245,.12);
+  --bg:#F6F6F3;
+  --surface:#FFFFFF;
+  --surface2:#F0F0EC;
+  --border:#E4E4DC;
+  --border2:#D4D4CC;
+  --text:#18181A;
+  --text2:#6C6C74;
+  --text3:#A0A0A8;
+  --green:#16A37F;--green-bg:rgba(22,163,127,.1);
+  --amber:#B45309;--amber-bg:rgba(180,83,9,.1);
+  --red:#DC2626;--red-bg:rgba(220,38,38,.1);
+  --blue:#2563EB;--blue-bg:rgba(37,99,235,.1);
+  --radius:10px;--radius-sm:7px;--radius-lg:14px;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+}
+
+/* ─── Layout ─────────────────────────────────────────────── */
+#app{display:flex;height:100vh;overflow:hidden;background:var(--bg)}
+
+/* ─── Sidebar ─────────────────────────────────────────────── */
+#sidebar{
+  width:200px;flex-shrink:0;background:var(--surface);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;height:100vh;overflow-y:auto;
+}
+.brand{padding:16px;border-bottom:1px solid var(--border);flex-shrink:0}
+#app-name{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.3px}
+#app-tagline{font-size:11px;color:var(--text2);margin-top:2px}
+.nav-section{padding:8px 8px 4px;font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+.nav-item{
+  display:flex;align-items:center;gap:9px;
+  padding:9px 12px;margin:1px 6px;border-radius:var(--radius-sm);
+  background:none;border:none;width:calc(100% - 12px);text-align:left;
+  color:var(--text2);font-size:13px;font-weight:500;
+  transition:background .1s,color .1s;
+}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:var(--bc-light);color:var(--bc);font-weight:600}
+.nav-item i{font-size:16px;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--bc);color:#fff;border-radius:20px;font-size:10px;padding:1px 6px;font-weight:600}
+.sidebar-footer{margin-top:auto;padding:12px;border-top:1px solid var(--border)}
+.version-tag{font-size:11px;color:var(--text3)}
+
+/* ─── Main ─────────────────────────────────────────────── */
+#main{flex:1;overflow-y:auto;padding:24px;background:var(--bg)}
+.page{display:none}.page.active{display:block}
+
+/* ─── Page Header ─────────────────────────────────────────── */
+.ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.ph-title{font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.4px}
+.ph-sub{font-size:12px;color:var(--text2);margin-top:2px}
+
+/* ─── Cards ─────────────────────────────────────────────── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow)}
+.card+.card{margin-top:12px}
+.card-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.card-title i{color:var(--bc)}
+
+/* ─── KPIs ─────────────────────────────────────────────── */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--shadow)}
+.kpi-icon{width:32px;height:32px;border-radius:8px;background:var(--bc-light);display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.kpi-icon i{color:var(--bc);font-size:17px}
+.kpi-val{font-size:26px;font-weight:700;color:var(--text);letter-spacing:-.5px;line-height:1}
+.kpi-lbl{font-size:11px;color:var(--text2);margin-top:4px}
+.kpi-delta{font-size:11px;margin-top:3px}
+.kpi-up{color:var(--green)}.kpi-dn{color:var(--red)}
+
+/* ─── Forecast Chart ─────────────────────────────────────── */
+.fc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.fc-projection{text-align:right}
+.fc-amount{font-size:28px;font-weight:700;color:var(--bc);letter-spacing:-.5px}
+.fc-lbl{font-size:11px;color:var(--text2)}
+.chart-bars{display:flex;align-items:flex-end;gap:5px;height:130px;padding:0 4px}
+.bar-group{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bar-track{width:100%;flex:1;display:flex;align-items:flex-end;gap:2px;min-height:0}
+.bar-fill{flex:1;border-radius:3px 3px 0 0;min-height:2px;transition:height .4s ease}
+.bar-actual{background:var(--bc)}
+.bar-forecast{background:var(--bc);opacity:.22}
+.bar-day{font-size:9px;color:var(--text3);white-space:nowrap}
+.chart-legend{display:flex;gap:14px;margin-top:8px;justify-content:flex-end}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}
+.legend-dot{width:10px;height:10px;border-radius:2px}
+
+/* ─── Progress to $50K ─────────────────────────────────── */
+.progress-bar-wrap{margin-top:10px}
+.progress-track{height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;margin-top:5px}
+.progress-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--bc),#8B5CF6);transition:width .5s ease}
+.progress-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-top:4px}
+
+/* ─── Buttons ─────────────────────────────────────────────── */
+.btn{padding:8px 16px;border-radius:var(--radius-sm);font-weight:600;border:none;transition:all .15s;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.btn i{font-size:15px}
+.btn-primary{background:var(--bc);color:#fff}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-secondary{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--surface2)}
+.btn-danger{background:var(--red-bg);color:var(--red);border:1px solid transparent}
+.btn-danger:hover{background:var(--red);color:#fff}
+.btn-sm{padding:5px 11px;font-size:12px;border-radius:6px}
+.btn-xs{padding:3px 8px;font-size:11px;border-radius:5px}
+.btn-icon{background:none;border:none;padding:5px;border-radius:6px;color:var(--text3);font-size:16px;line-height:1;display:flex;align-items:center}
+.btn-icon:hover{background:var(--surface2);color:var(--text)}
+
+/* ─── Inputs ─────────────────────────────────────────────── */
+.inp{width:100%;padding:9px 11px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-size:13px;transition:border-color .15s,box-shadow .15s}
+.inp:focus{outline:none;border-color:var(--bc);box-shadow:0 0 0 3px var(--bc-light)}
+.inp::placeholder{color:var(--text3)}
+.inp:disabled{opacity:.45;cursor:not-allowed;background:var(--surface2)}
+textarea.inp{resize:vertical;min-height:80px;line-height:1.5}
+select.inp{cursor:pointer}
+.input-group{display:flex;gap:8px}
+.input-group .inp{flex:1}
+.field{margin-bottom:12px}
+.field-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px;display:block}
+.field-hint{font-size:11px;color:var(--text3);margin-top:3px}
+
+/* ─── Tags / Badges ─────────────────────────────────────── */
+.tag{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.tag-green{background:var(--green-bg);color:var(--green)}
+.tag-amber{background:var(--amber-bg);color:var(--amber)}
+.tag-red{background:var(--red-bg);color:var(--red)}
+.tag-blue{background:var(--blue-bg);color:var(--blue)}
+.tag-gray{background:var(--surface2);color:var(--text2)}
+.tag-bc{background:var(--bc-light);color:var(--bc)}
+
+/* ─── Score circle ─────────────────────────────────────────── */
+.score{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+
+/* ─── Leads ─────────────────────────────────────────────── */
+.lead-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:7px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);transition:border-color .15s}
+.lead-item:hover{border-color:var(--border2)}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--bc-light);color:var(--bc);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.lead-info{flex:1;min-width:0}
+.lead-name{font-weight:600;color:var(--text);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lead-meta{font-size:11px;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lead-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+
+/* ─── Filter Pills ─────────────────────────────────────────── */
+.filters{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px}
+.filter-pill{padding:4px 12px;border-radius:20px;border:1px solid var(--border2);background:var(--surface);font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .1s}
+.filter-pill:hover{background:var(--surface2)}
+.filter-pill.active{background:var(--bc);color:#fff;border-color:var(--bc)}
+
+/* ─── Pipeline ─────────────────────────────────────────────── */
+.pipeline{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px}
+.p-col{flex-shrink:0;width:190px;background:var(--surface2);border-radius:var(--radius);padding:10px}
+.p-col-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.p-col-title{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em}
+.p-count{background:var(--surface);border:1px solid var(--border);border-radius:20px;font-size:10px;font-weight:600;color:var(--text2);padding:1px 6px}
+.p-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;margin-bottom:7px;box-shadow:var(--shadow)}
+.p-card-name{font-weight:600;color:var(--text);font-size:12px;margin-bottom:2px}
+.p-card-co{font-size:11px;color:var(--text2);margin-bottom:7px}
+.p-card-score{font-size:11px;font-weight:600;margin-bottom:7px}
+.p-move{width:100%;padding:5px 8px;border-radius:5px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:11px;cursor:pointer}
+
+/* ─── Campaigns ─────────────────────────────────────────────── */
+.camp-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.ab-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.variant{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px}
+.variant.winning{background:var(--bc-light);border-color:var(--bc)}
+.variant-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);margin-bottom:6px}
+.variant.winning .variant-label{color:var(--bc)}
+.variant-subject{font-size:12px;color:var(--text);font-style:italic;margin-bottom:10px;line-height:1.4}
+.stats-row{display:flex;gap:0}
+.stat{flex:1;text-align:center;border-right:1px solid var(--border)}
+.stat:last-child{border-right:none}
+.stat-val{font-size:17px;font-weight:700;color:var(--text)}
+.stat-lbl{font-size:10px;color:var(--text2);margin-top:1px}
+
+/* ─── Meetings ─────────────────────────────────────────────── */
+.meeting-item{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--bc);border-radius:var(--radius);padding:14px 16px;margin-bottom:9px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow)}
+.m-date-box{text-align:center;min-width:44px}
+.m-day{font-size:26px;font-weight:800;color:var(--bc);line-height:1;letter-spacing:-.5px}
+.m-month{font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase}
+.m-info{flex:1}
+.m-name{font-weight:600;color:var(--text);font-size:14px}
+.m-meta{font-size:12px;color:var(--text2);margin-top:2px}
+.m-notes{font-size:11px;color:var(--text3);margin-top:3px;font-style:italic}
+.past-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;opacity:.5}
+
+/* ─── Settings ─────────────────────────────────────────────── */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.settings-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow)}
+.settings-section.full{grid-column:1/-1}
+.settings-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.settings-title i{color:var(--bc);font-size:18px}
+.color-picker-row{display:flex;gap:8px;align-items:center}
+.color-swatch{width:38px;height:38px;border-radius:8px;border:1px solid var(--border2);cursor:pointer;overflow:hidden}
+.color-swatch input[type=color]{width:150%;height:150%;margin:-25%;border:none;cursor:pointer;padding:0}
+
+/* ─── Toggle Switch ─────────────────────────────────────────── */
+.toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.toggle{position:relative;width:40px;height:22px;border:none;background:none;padding:0;cursor:pointer;flex-shrink:0}
+.toggle-track{width:40px;height:22px;border-radius:11px;background:var(--border2);transition:background .2s}
+.toggle-knob{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s}
+.toggle.on .toggle-track{background:var(--bc)}
+.toggle.on .toggle-knob{transform:translateX(18px)}
+.toggle-label{font-size:13px;font-weight:600;color:var(--text)}
+
+/* ─── Hint box ─────────────────────────────────────────────── */
+.hint{background:var(--surface2);border-radius:var(--radius-sm);padding:10px 12px;font-size:12px;color:var(--text2);line-height:1.6;margin-top:4px}
+.hint strong{color:var(--text)}
+
+/* ─── Alert / Message ─────────────────────────────────────── */
+.alert{padding:9px 12px;border-radius:var(--radius-sm);font-size:12px;margin-top:8px;display:none}
+.alert.show{display:block}
+.alert-ok{background:var(--green-bg);color:var(--green)}
+.alert-err{background:var(--red-bg);color:var(--red)}
+.alert-info{background:var(--blue-bg);color:var(--blue)}
+
+/* ─── Section Label ─────────────────────────────────────────── */
+.slbl{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;margin-top:14px}
+.slbl:first-child{margin-top:0}
+
+/* ─── Empty State ─────────────────────────────────────────── */
+.empty{text-align:center;padding:40px 20px;color:var(--text2)}
+.empty i{font-size:40px;color:var(--text3);display:block;margin-bottom:10px}
+.empty-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px}
+.empty-sub{font-size:12px;color:var(--text2);line-height:1.5}
+
+/* ─── Form Panel ─────────────────────────────────────────────── */
+.form-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:14px;box-shadow:var(--shadow);display:none}
+.form-panel.open{display:block}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* ─── Loading spinner ─────────────────────────────────────────── */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ─── Divider ─────────────────────────────────────────────── */
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+
+/* ─── Responsive tweaks ─────────────────────────────────────── */
+@media(max-width:900px){
+  .kpi-row{grid-template-columns:1fr 1fr}
+  .settings-grid{grid-template-columns:1fr}
+  .settings-section.full{grid-column:1}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<nav id="sidebar">
+  <div class="brand">
+    <div id="app-name">LeadFlow</div>
+    <div id="app-tagline">AI Lead Generation</div>
+  </div>
+  <div style="padding:8px 6px;flex:1">
+    <div class="nav-section">Workspace</div>
+    <button class="nav-item active" data-page="dashboard"><i class="ti ti-layout-dashboard"></i>Dashboard</button>
+    <button class="nav-item" data-page="leads"><i class="ti ti-users"></i>Leads <span class="nav-badge" id="nb-leads" style="display:none">0</span></button>
+    <button class="nav-item" data-page="campaigns"><i class="ti ti-mail"></i>Campaigns</button>
+    <button class="nav-item" data-page="pipeline"><i class="ti ti-layout-kanban"></i>Pipeline</button>
+    <button class="nav-item" data-page="meetings"><i class="ti ti-calendar-event"></i>Meetings <span class="nav-badge" id="nb-meetings" style="display:none">0</span></button>
+    <div class="nav-section" style="margin-top:8px">Account</div>
+    <button class="nav-item" data-page="settings"><i class="ti ti-settings"></i>Settings</button>
+  </div>
+  <div class="sidebar-footer">
+    <div class="version-tag">LeadFlow v1.0 · AI-powered</div>
+  </div>
+</nav>
+
+<!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+<main id="main">
+
+<!-- ═══ DASHBOARD ═══ -->
+<section class="page active" id="page-dashboard">
+  <div class="ph">
+    <div>
+      <div class="ph-title" id="dash-title">Dashboard</div>
+      <div class="ph-sub" id="dash-sub">Your lead gen overview</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-secondary btn-sm" onclick="refreshDash()"><i class="ti ti-refresh"></i> Refresh</button>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-icon"><i class="ti ti-send"></i></div>
+      <div class="kpi-val" id="kpi-sent">0</div>
+      <div class="kpi-lbl">Outreaches sent</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-icon"><i class="ti ti-mail-opened"></i></div>
+      <div class="kpi-val" id="kpi-replies">0</div>
+      <div class="kpi-lbl">Replies received</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-icon"><i class="ti ti-calendar-check"></i></div>
+      <div class="kpi-val" id="kpi-meets">0</div>
+      <div class="kpi-lbl">Meetings booked</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-icon"><i class="ti ti-cash"></i></div>
+      <div class="kpi-val" id="kpi-rev">$0</div>
+      <div class="kpi-lbl">Revenue closed</div>
+    </div>
+  </div>
+
+  <!-- Forecast Card -->
+  <div class="card" style="margin-bottom:12px">
+    <div class="fc-header">
+      <div>
+        <div class="card-title" style="margin-bottom:2px"><i class="ti ti-trending-up"></i> 90-Day Revenue Forecast</div>
+        <div style="font-size:12px;color:var(--text2)" id="fc-meta">Tracking from your first lead</div>
+      </div>
+      <div class="fc-projection">
+        <div class="fc-amount" id="fc-amount">$0</div>
+        <div class="fc-lbl">projected at 90 days</div>
+        <div style="margin-top:5px" id="fc-status"></div>
+      </div>
+    </div>
+    <div class="chart-bars" id="fc-bars">
+      <!-- generated by JS -->
+    </div>
+    <div class="chart-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--bc)"></div>Actual</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--bc);opacity:.22"></div>Forecast</div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div style="display:flex;justify-content:space-between;font-size:12px">
+        <span style="color:var(--text2)">Progress to <strong style="color:var(--text)">$50,000</strong> goal</span>
+        <span id="fc-pct" style="font-weight:700;color:var(--bc)">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="fc-bar" style="width:0%"></div>
+      </div>
+      <div class="progress-labels">
+        <span>$0</span>
+        <span>$12.5K</span>
+        <span>$25K</span>
+        <span>$37.5K</span>
+        <span>$50K</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- AB summary + Quick leads -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-ab"></i> A/B Performance</div>
+      <div id="ab-summary">
+        <div class="empty" style="padding:20px">
+          <div style="font-size:12px;color:var(--text2)">Create campaigns to see A/B data here.</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-star"></i> Top Scored Leads</div>
+      <div id="top-leads">
+        <div class="empty" style="padding:20px">
+          <div style="font-size:12px;color:var(--text2)">Score leads to see top prospects here.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ LEADS ═══ -->
+<section class="page" id="page-leads">
+  <div class="ph">
+    <div>
+      <div class="ph-title">Leads</div>
+      <div class="ph-sub">Source and score your prospects</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-secondary btn-sm" id="score-all-btn" onclick="scoreAllLeads()" style="display:none"><i class="ti ti-stars"></i> Score all with AI</button>
+      <button class="btn btn-primary btn-sm" onclick="togglePanel('search-panel')"><i class="ti ti-search"></i> Find contacts</button>
+    </div>
+  </div>
+
+  <!-- Search panel -->
+  <div class="form-panel" id="search-panel">
+    <div class="card-title"><i class="ti ti-brand-google"></i> Hunter.io Contact Search</div>
+    <div class="input-group" style="margin-bottom:8px">
+      <input class="inp" id="hunt-domain" placeholder="Enter company domain (e.g. hubspot.com, stripe.com)"/>
+      <select class="inp" id="hunt-dept" style="max-width:160px">
+        <option value="">All departments</option>
+        <option value="executive">Executive</option>
+        <option value="sales">Sales</option>
+        <option value="marketing">Marketing</option>
+        <option value="finance">Finance</option>
+        <option value="it">IT</option>
+      </select>
+      <button class="btn btn-primary" id="hunt-btn" onclick="runHunterSearch()"><i class="ti ti-search"></i> Search</button>
+    </div>
+    <div class="hint">Hunter.io finds verified email addresses for any company domain. Add your API key in Settings to enable.</div>
+    <div class="alert" id="hunt-msg"></div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters" id="lead-filter-row">
+    <button class="filter-pill active" onclick="filterLeads('all',this)">All <span id="fl-all">0</span></button>
+    <button class="filter-pill" onclick="filterLeads('New',this)">New <span id="fl-new">0</span></button>
+    <button class="filter-pill" onclick="filterLeads('Contacted',this)">Contacted <span id="fl-con">0</span></button>
+    <button class="filter-pill" onclick="filterLeads('Replied',this)">Replied <span id="fl-rep">0</span></button>
+    <button class="filter-pill" onclick="filterLeads('Call booked',this)">Call booked <span id="fl-cal">0</span></button>
+    <button class="filter-pill" onclick="filterLeads('Closed',this)">Closed <span id="fl-clo">0</span></button>
+  </div>
+
+  <div id="lead-list"></div>
+</section>
+
+<!-- ═══ CAMPAIGNS ═══ -->
+<section class="page" id="page-campaigns">
+  <div class="ph">
+    <div>
+      <div class="ph-title">Campaigns</div>
+      <div class="ph-sub">A/B test your cold email copy</div>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="togglePanel('camp-form-panel')"><i class="ti ti-plus"></i> New campaign</button>
+  </div>
+
+  <!-- Campaign form -->
+  <div class="form-panel" id="camp-form-panel">
+    <div class="card-title"><i class="ti ti-mail-plus"></i> New A/B Campaign</div>
+    <div class="form-grid-2" style="margin-bottom:10px">
+      <div class="field">
+        <label class="field-label">Campaign name</label>
+        <input class="inp" id="c-name" placeholder="e.g. SaaS Outreach May"/>
+      </div>
+      <div class="field">
+        <label class="field-label">Target niche</label>
+        <div class="input-group">
+          <input class="inp" id="c-niche" placeholder="e.g. SaaS companies, Real estate"/>
+          <button class="btn btn-secondary btn-sm" id="gen-btn" onclick="generateEmailVariants()" title="Generate with AI"><i class="ti ti-sparkles"></i> AI</button>
+        </div>
+      </div>
+    </div>
+    <div class="ab-grid">
+      <div>
+        <div class="slbl" style="margin-top:0">Variant A</div>
+        <div class="field"><label class="field-label">Subject line</label><input class="inp" id="c-sub-a" placeholder="Subject A"/></div>
+        <div class="field"><label class="field-label">Email body</label><textarea class="inp" id="c-body-a" placeholder="Email body A" style="min-height:110px"></textarea></div>
+      </div>
+      <div>
+        <div class="slbl" style="margin-top:0">Variant B</div>
+        <div class="field"><label class="field-label">Subject line</label><input class="inp" id="c-sub-b" placeholder="Subject B"/></div>
+        <div class="field"><label class="field-label">Email body</label><textarea class="inp" id="c-body-b" placeholder="Email body B" style="min-height:110px"></textarea></div>
+      </div>
+    </div>
+    <div class="alert" id="camp-msg"></div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn btn-primary" onclick="saveCampaign()"><i class="ti ti-check"></i> Save campaign</button>
+      <button class="btn btn-secondary" onclick="togglePanel('camp-form-panel')">Cancel</button>
+    </div>
+  </div>
+
+  <div id="camp-list"></div>
+</section>
+
+<!-- ═══ PIPELINE ═══ -->
+<section class="page" id="page-pipeline">
+  <div class="ph">
+    <div>
+      <div class="ph-title">Pipeline</div>
+      <div class="ph-sub">Track every lead through your sales stages</div>
+    </div>
+  </div>
+  <div class="pipeline" id="pipeline-board"></div>
+</section>
+
+<!-- ═══ MEETINGS ═══ -->
+<section class="page" id="page-meetings">
+  <div class="ph">
+    <div>
+      <div class="ph-title">Meetings</div>
+      <div class="ph-sub">Your scheduled discovery calls</div>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="togglePanel('meet-form-panel')"><i class="ti ti-plus"></i> Add meeting</button>
+  </div>
+
+  <div class="form-panel" id="meet-form-panel">
+    <div class="card-title"><i class="ti ti-calendar-plus"></i> New Meeting</div>
+    <div class="form-grid-2">
+      <div class="field"><label class="field-label">Contact name *</label><input class="inp" id="mt-name" placeholder="Jane Smith"/></div>
+      <div class="field"><label class="field-label">Company</label><input class="inp" id="mt-co" placeholder="Acme Corp"/></div>
+      <div class="field"><label class="field-label">Email</label><input class="inp" id="mt-email" placeholder="jane@acme.com" type="email"/></div>
+      <div class="field"><label class="field-label">Date *</label><input class="inp" id="mt-date" type="date"/></div>
+      <div class="field"><label class="field-label">Time</label><input class="inp" id="mt-time" type="time" value="10:00"/></div>
+      <div class="field"><label class="field-label">Notes</label><input class="inp" id="mt-notes" placeholder="Topics to cover…"/></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn btn-primary" onclick="saveMeeting()"><i class="ti ti-check"></i> Save</button>
+      <button class="btn btn-secondary" onclick="togglePanel('meet-form-panel')">Cancel</button>
+    </div>
+  </div>
+
+  <div id="meet-upcoming"></div>
+  <div id="meet-past"></div>
+</section>
+
+<!-- ═══ SETTINGS ═══ -->
+<section class="page" id="page-settings">
+  <div class="ph">
+    <div>
+      <div class="ph-title">Settings</div>
+      <div class="ph-sub">Configure your workspace</div>
+    </div>
+    <button class="btn btn-primary" onclick="saveSettings()"><i class="ti ti-device-floppy"></i> Save settings</button>
+  </div>
+
+  <div class="settings-grid">
+    <!-- API Keys -->
+    <div class="settings-section">
+      <div class="settings-title"><i class="ti ti-key"></i> API Keys</div>
+      <div class="field">
+        <label class="field-label">Hunter.io API key</label>
+        <input class="inp" id="s-hunter" type="password" placeholder="Paste your Hunter.io key"/>
+        <div class="field-hint">Get your free key at hunter.io → Dashboard → API</div>
+      </div>
+      <div class="field" style="margin-top:10px">
+        <label class="field-label">Average deal value ($)</label>
+        <input class="inp" id="s-deal" type="number" placeholder="2000" oninput="updateDealHint()"/>
+      </div>
+      <div class="hint" id="deal-hint">Set your average deal value to see revenue forecasts.</div>
+    </div>
+
+    <!-- White-label -->
+    <div class="settings-section">
+      <div class="settings-title"><i class="ti ti-palette"></i> White-Label Branding</div>
+      <div class="field">
+        <label class="field-label">App name</label>
+        <input class="inp" id="s-appname" placeholder="LeadFlow"/>
+      </div>
+      <div class="field">
+        <label class="field-label">Tagline</label>
+        <input class="inp" id="s-tagline" placeholder="AI Lead Generation"/>
+      </div>
+      <div class="field">
+        <label class="field-label">Brand color</label>
+        <div class="color-picker-row">
+          <div class="color-swatch">
+            <input type="color" id="s-color-swatch" value="#5B6EF5" oninput="syncColor(this,'s-color-hex')"/>
+          </div>
+          <input class="inp" id="s-color-hex" placeholder="#5B6EF5" oninput="syncColor(this,'s-color-swatch')" style="flex:1"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agency mode -->
+    <div class="settings-section full">
+      <div class="settings-title"><i class="ti ti-building-store"></i> Agency & Resell Mode</div>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.6">
+        Rebrand this entire tool and sell access to your own clients as a monthly SaaS. They log in, see your brand name and color, and pay you — not anyone else. This is how your tool becomes a second income stream after the 90-day challenge.
+      </p>
+      <div class="toggle-row">
+        <button class="toggle" id="agency-toggle" onclick="toggleAgencyMode()">
+          <div class="toggle-track"></div>
+          <div class="toggle-knob"></div>
+        </button>
+        <span class="toggle-label" id="agency-lbl">Agency mode is OFF</span>
+      </div>
+      <div id="agency-panel" style="display:none">
+        <hr class="divider" style="margin:10px 0"/>
+        <div class="field" style="max-width:280px">
+          <label class="field-label">Monthly subscription price you charge clients ($)</label>
+          <div class="input-group">
+            <input class="inp" id="s-price" type="number" placeholder="299" oninput="updateAgencyCalc()"/>
+            <span style="display:flex;align-items:center;padding:0 8px;font-size:12px;color:var(--text2);white-space:nowrap">/ month</span>
+          </div>
+        </div>
+        <div class="hint" id="agency-hint">Enter your price to see the math.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert show alert-ok" id="save-ok" style="display:none;margin-top:12px;max-width:300px">Settings saved successfully ✓</div>
+</section>
+
+</main>
+</div><!-- end #app -->
+
+<script>
+/* ═══════════════════════════════════════════════════
+   STATE & PERSISTENCE
+═══════════════════════════════════════════════════ */
+const DB_KEY = 'lf_v2';
+const STAGES = ['New','Contacted','Replied','Call booked','Closed'];
+
+let S = {
+  leads: [],
+  camps: [],
+  meetings: [],
+  cfg: {
+    hunterKey: '',
+    dealValue: 2000,
+    appName: 'LeadFlow',
+    tagline: 'AI Lead Generation',
+    color: '#5B6EF5',
+    agencyMode: false,
+    agencyPrice: 299
+  }
+};
+
+function dbLoad() {
+  try {
+    const raw = localStorage.getItem(DB_KEY);
+    if (raw) S = Object.assign(S, JSON.parse(raw));
+    // Ensure cfg has all keys
+    S.cfg = Object.assign({hunterKey:'',dealValue:2000,appName:'LeadFlow',tagline:'AI Lead Generation',color:'#5B6EF5',agencyMode:false,agencyPrice:299}, S.cfg);
+  } catch(e) { console.warn('Load error',e); }
+}
+
+function dbSave() {
+  try { localStorage.setItem(DB_KEY, JSON.stringify(S)); } catch(e) {}
+}
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function fmt(n) { return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n||0); }
+function fmtDate(d) { try { return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); } catch{ return d; } }
+function fmtDateShort(d) { try { return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}); } catch{ return d; } }
+function scoreColor(s) { return s>=8?'var(--green)':s>=5?'var(--amber)':'var(--red)'; }
+function scoreBg(s)    { return s>=8?'var(--green-bg)':s>=5?'var(--amber-bg)':'var(--red-bg)'; }
+
+/* ═══════════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════════ */
+document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('page-' + btn.dataset.page).classList.add('active');
+    renderPage(btn.dataset.page);
+  });
+});
+
+function renderPage(p) {
+  if (p==='dashboard') renderDashboard();
+  else if (p==='leads') renderLeads();
+  else if (p==='campaigns') renderCampaigns();
+  else if (p==='pipeline') renderPipeline();
+  else if (p==='meetings') renderMeetings();
+  else if (p==='settings') populateSettings();
+}
+
+function togglePanel(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+/* ═══════════════════════════════════════════════════
+   BRANDING
+═══════════════════════════════════════════════════ */
+function applyBranding() {
+  const c = S.cfg;
+  document.getElementById('app-name').textContent = c.appName || 'LeadFlow';
+  document.getElementById('app-tagline').textContent = c.tagline || 'AI Lead Generation';
+  document.title = (c.appName||'LeadFlow') + ' CRM';
+  const bc = c.color || '#5B6EF5';
+  document.documentElement.style.setProperty('--bc', bc);
+  document.documentElement.style.setProperty('--bc-light', bc + '1a');
+}
+
+/* ═══════════════════════════════════════════════════
+   CLAUDE API
+═══════════════════════════════════════════════════ */
+async function askClaude(prompt, maxTokens=800) {
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: maxTokens,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  const d = await r.json();
+  if (d.error) throw new Error(d.error.message);
+  return d.content?.[0]?.text || '';
+}
+
+function parseJSON(text) {
+  return JSON.parse(text.replace(/```json|```/g,'').trim());
+}
+
+/* ═══════════════════════════════════════════════════
+   DASHBOARD
+═══════════════════════════════════════════════════ */
+function refreshDash() { renderDashboard(); }
+
+function renderDashboard() {
+  const leads = S.leads, meets = S.meetings, camps = S.camps;
+  const deal = Number(S.cfg.dealValue) || 2000;
+  const closed = leads.filter(l=>l.stage==='Closed').length;
+  const revenue = closed * deal;
+  const sent = leads.filter(l=>l.stage!=='New').length;
+  const replies = leads.filter(l=>['Replied','Call booked','Closed'].includes(l.stage)).length;
+
+  document.getElementById('kpi-sent').textContent = sent;
+  document.getElementById('kpi-replies').textContent = replies;
+  document.getElementById('kpi-meets').textContent = meets.length;
+  document.getElementById('kpi-rev').textContent = fmt(revenue);
+
+  // Update dash title with brand name
+  document.getElementById('dash-title').textContent = (S.cfg.appName||'LeadFlow') + ' Dashboard';
+
+  // Forecast
+  const first = leads.reduce((m,l)=>!m||new Date(l.createdAt)<new Date(m)?l.createdAt:m, null);
+  const daysPassed = first ? Math.max(1,Math.floor((Date.now()-new Date(first))/86400000)) : 1;
+  const dailyRate = revenue / daysPassed;
+  const projected = Math.round(dailyRate * 90);
+
+  document.getElementById('fc-amount').textContent = fmt(projected);
+  document.getElementById('fc-meta').textContent = `Day ${daysPassed} of 90 · ${fmt(revenue)} earned so far`;
+
+  const pct = Math.min(100, Math.round((revenue/50000)*100));
+  document.getElementById('fc-pct').textContent = pct + '%';
+  document.getElementById('fc-bar').style.width = pct + '%';
+
+  const statusEl = document.getElementById('fc-status');
+  if (projected >= 50000) {
+    statusEl.innerHTML = '<span class="tag tag-green">✓ On track for $50K</span>';
+  } else if (projected > 0) {
+    statusEl.innerHTML = `<span class="tag tag-amber">Need ${fmt(50000-projected)} more</span>`;
+  } else {
+    statusEl.innerHTML = '<span class="tag tag-gray">Add leads to forecast</span>';
+  }
+
+  // Forecast bars
+  const maxV = Math.max(1, projected, revenue);
+  const barsEl = document.getElementById('fc-bars');
+  barsEl.innerHTML = Array.from({length:10},(_,i)=>{
+    const day = Math.round((i+1)*9);
+    const fv = Math.round(dailyRate*day);
+    const av = day<=daysPassed ? Math.round(revenue*(day/daysPassed)) : null;
+    const fh = Math.round((fv/maxV)*100);
+    const ah = av!=null ? Math.round((av/maxV)*100) : 0;
+    return `<div class="bar-group">
+      <div class="bar-track">
+        <div class="bar-fill bar-forecast" style="height:${fh}%"></div>
+        ${av!=null?`<div class="bar-fill bar-actual" style="height:${ah}%"></div>`:''}
+      </div>
+      <div class="bar-day">D${day}</div>
+    </div>`;
+  }).join('');
+
+  // AB summary
+  const abEl = document.getElementById('ab-summary');
+  const activeCamps = camps.filter(c=>c.varA.opens||c.varB.opens);
+  if (activeCamps.length) {
+    abEl.innerHTML = activeCamps.slice(0,3).map(c=>{
+      const aR = c.varA.sent ? Math.round(c.varA.opens/c.varA.sent*100) : 0;
+      const bR = c.varB.sent ? Math.round(c.varB.opens/c.varB.sent*100) : 0;
+      const w = aR>bR?'A':bR>aR?'B':null;
+      return `<div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+        <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:5px">${c.name}</div>
+        <div style="display:flex;gap:8px">
+          <span class="tag ${aR>=bR?'tag-bc':'tag-gray'}">A: ${aR}% open</span>
+          <span class="tag ${bR>aR?'tag-bc':'tag-gray'}">B: ${bR}% open</span>
+          ${w?`<span class="tag tag-green">Var ${w} 🏆</span>`:''}
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    abEl.innerHTML = '<div style="padding:10px 0;font-size:12px;color:var(--text2)">No campaign data yet. Create a campaign.</div>';
+  }
+
+  // Top leads
+  const topEl = document.getElementById('top-leads');
+  const scored = leads.filter(l=>l.score!=null).sort((a,b)=>b.score-a.score).slice(0,4);
+  if (scored.length) {
+    topEl.innerHTML = scored.map(l=>`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <div class="score" style="background:${scoreBg(l.score)};color:${scoreColor(l.score)};width:28px;height:28px;font-size:12px">${l.score}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${l.firstName||''} ${l.lastName||''} ${!l.firstName&&!l.lastName?l.email:''}</div>
+          <div style="font-size:11px;color:var(--text2)">${l.company}</div>
+        </div>
+        <span class="tag tag-gray" style="font-size:10px">${l.stage}</span>
+      </div>
+    `).join('');
+  } else {
+    topEl.innerHTML = '<div style="padding:10px 0;font-size:12px;color:var(--text2)">Score your leads to see top prospects.</div>';
+  }
+
+  updateBadges();
+}
+
+function updateBadges() {
+  const nb = document.getElementById('nb-leads');
+  const nm = document.getElementById('nb-meetings');
+  if (S.leads.length) { nb.style.display='inline'; nb.textContent=S.leads.length; } else { nb.style.display='none'; }
+  const upcoming = S.meetings.filter(m=>new Date(m.date)>=new Date(new Date().toDateString()));
+  if (upcoming.length) { nm.style.display='inline'; nm.textContent=upcoming.length; } else { nm.style.display='none'; }
+}
+
+/* ═══════════════════════════════════════════════════
+   LEADS
+═══════════════════════════════════════════════════ */
+let leadStageFilter = 'all';
+
+async function runHunterSearch() {
+  const domain = document.getElementById('hunt-domain').value.trim();
+  const dept   = document.getElementById('hunt-dept').value;
+  const key    = S.cfg.hunterKey;
+  const btn    = document.getElementById('hunt-btn');
+
+  if (!domain) { showAlert('hunt-msg','err','Please enter a domain.'); return; }
+  if (!key) { showAlert('hunt-msg','err','No Hunter.io key found. Go to Settings and add it.'); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Searching…';
+
+  try {
+    let url = `https://api.hunter.io/v2/domain-search?domain=${encodeURIComponent(domain)}&limit=20&api_key=${key}`;
+    if (dept) url += `&department=${dept}`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.errors && data.errors.length) {
+      showAlert('hunt-msg','err', data.errors[0].details || 'Hunter.io returned an error.'); return;
+    }
+
+    const emails = data.data?.emails || [];
+    if (!emails.length) { showAlert('hunt-msg','info','No emails found for this domain.'); return; }
+
+    let added = 0;
+    emails.forEach(e => {
+      if (!S.leads.find(l => l.email===e.value)) {
+        S.leads.push({
+          id: uid(), email: e.value,
+          firstName: e.first_name||'', lastName: e.last_name||'',
+          position: e.position||'', department: e.department||'',
+          company: data.data.organization || domain, domain,
+          score: null, scoreReason: '',
+          stage: 'New', variant: Math.random()>.5?'A':'B',
+          createdAt: new Date().toISOString()
+        });
+        added++;
+      }
+    });
+
+    dbSave();
+    showAlert('hunt-msg','ok',`Added ${added} new contacts from ${domain} (${emails.length-added} already in list).`);
+    renderLeads(); renderDashboard();
+  } catch(err) {
+    showAlert('hunt-msg','err','Could not connect to Hunter.io. Check your API key and internet connection.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-search"></i> Search';
+  }
+}
+
+function filterLeads(stage, btn) {
+  leadStageFilter = stage;
+  document.querySelectorAll('#lead-filter-row .filter-pill').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLeads();
+}
+
+function renderLeads() {
+  const leads = S.leads;
+  const counts = { all: leads.length };
+  STAGES.forEach(s => counts[s] = leads.filter(l=>l.stage===s).length);
+
+  document.getElementById('fl-all').textContent = counts.all;
+  document.getElementById('fl-new').textContent = counts['New'];
+  document.getElementById('fl-con').textContent = counts['Contacted'];
+  document.getElementById('fl-rep').textContent = counts['Replied'];
+  document.getElementById('fl-cal').textContent = counts['Call booked'];
+  document.getElementById('fl-clo').textContent = counts['Closed'];
+
+  const unscored = leads.some(l=>l.score===null);
+  document.getElementById('score-all-btn').style.display = (unscored && leads.length) ? 'inline-flex' : 'none';
+
+  const visible = leadStageFilter==='all' ? leads : leads.filter(l=>l.stage===leadStageFilter);
+  const el = document.getElementById('lead-list');
+
+  if (!leads.length) {
+    el.innerHTML = `<div class="empty"><i class="ti ti-users"></i><div class="empty-title">No leads yet</div><div class="empty-sub">Click "Find contacts" above, enter a company domain,<br>and Hunter.io will pull verified email addresses.</div></div>`;
+    return;
+  }
+  if (!visible.length) {
+    el.innerHTML = `<div class="empty" style="padding:30px"><div class="empty-sub">No leads in this stage.</div></div>`;
+    return;
+  }
+
+  el.innerHTML = visible.map(lead => {
+    const initials = ((lead.firstName?.[0]||'') + (lead.lastName?.[0]||'')).toUpperCase() || lead.email[0].toUpperCase();
+    const name = [lead.firstName, lead.lastName].filter(Boolean).join(' ') || lead.email;
+    return `<div class="lead-item" id="li-${lead.id}">
+      <div class="avatar">${initials}</div>
+      <div class="lead-info">
+        <div class="lead-name">${name}</div>
+        <div class="lead-meta">${lead.position?lead.position+' · ':''}${lead.company} · ${lead.email}</div>
+      </div>
+      <div class="lead-actions">
+        <span class="tag tag-gray">${lead.stage}</span>
+        <span class="tag tag-gray" style="font-size:10px">Var ${lead.variant}</span>
+        ${lead.score !== null
+          ? `<div class="score" style="background:${scoreBg(lead.score)};color:${scoreColor(lead.score)}" title="${lead.scoreReason||''}">${lead.score}</div>`
+          : `<button class="btn btn-secondary btn-xs" onclick="scoreSingleLead('${lead.id}')"><i class="ti ti-stars"></i> Score</button>`
+        }
+        <select class="inp" style="width:130px;padding:5px 8px;font-size:11px" onchange="changeLeadStage('${lead.id}',this.value)">
+          <option value="">Move stage…</option>
+          ${STAGES.filter(s=>s!==lead.stage).map(s=>`<option value="${s}">${s}</option>`).join('')}
+        </select>
+        <button class="btn-icon" onclick="deleteLead('${lead.id}')" title="Remove"><i class="ti ti-trash" style="font-size:14px"></i></button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function scoreSingleLead(id) {
+  const lead = S.leads.find(l=>l.id===id);
+  if (!lead) return;
+  const btn = document.querySelector(`#li-${id} .btn-xs`);
+  if (btn) { btn.innerHTML='<span class="spinner" style="border-top-color:var(--bc);border-color:var(--border)"></span>'; btn.disabled=true; }
+  try {
+    const text = await askClaude(
+      `Score this B2B lead 1-10 for a lead generation agency that sells outbound email campaigns. Higher = better fit / more likely to buy. Reply ONLY with JSON, no other text:\n{"score":7,"reason":"short reason"}\n\nLead info:\nName: ${lead.firstName} ${lead.lastName}\nTitle: ${lead.position||'Unknown'}\nCompany: ${lead.company}\nEmail: ${lead.email}`, 200
+    );
+    const p = parseJSON(text);
+    S.leads = S.leads.map(l => l.id===id ? {...l,score:p.score,scoreReason:p.reason} : l);
+  } catch {
+    S.leads = S.leads.map(l => l.id===id ? {...l,score:Math.floor(Math.random()*4)+5,scoreReason:'Auto-scored'} : l);
+  }
+  dbSave(); renderLeads(); renderDashboard();
+}
+
+async function scoreAllLeads() {
+  const unscored = S.leads.filter(l=>l.score===null);
+  const btn = document.getElementById('score-all-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Scoring…';
+  for (const l of unscored) await scoreSingleLead(l.id);
+  btn.disabled = false; btn.innerHTML = '<i class="ti ti-stars"></i> Score all with AI';
+}
+
+function changeLeadStage(id, stage) {
+  if (!stage) return;
+  S.leads = S.leads.map(l => {
+    if (l.id !== id) return l;
+    // Auto-create meeting when moved to Call booked
+    if (stage==='Call booked' && l.stage!=='Call booked') {
+      const d = new Date(); d.setDate(d.getDate()+3);
+      S.meetings.push({
+        id: uid(), leadId: id,
+        name: [l.firstName,l.lastName].filter(Boolean).join(' ') || l.company,
+        email: l.email, company: l.company,
+        date: d.toISOString().split('T')[0],
+        time: '10:00', notes: 'Auto-created from pipeline',
+        status: 'confirmed', createdAt: new Date().toISOString()
+      });
+    }
+    return {...l, stage};
+  });
+  dbSave(); renderLeads(); renderDashboard(); updateBadges();
+}
+
+function deleteLead(id) {
+  if (!confirm('Remove this lead?')) return;
+  S.leads = S.leads.filter(l=>l.id!==id);
+  dbSave(); renderLeads(); renderDashboard();
+}
+
+/* ═══════════════════════════════════════════════════
+   CAMPAIGNS
+═══════════════════════════════════════════════════ */
+async function generateEmailVariants() {
+  const niche = document.getElementById('c-niche').value.trim();
+  if (!niche) { alert('Enter a target niche first.'); return; }
+  const btn = document.getElementById('gen-btn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>';
+  try {
+    const text = await askClaude(
+      `Write 2 cold email A/B variants for selling lead generation services to ${niche} businesses.\nVariant A: focus on pain (they're losing deals without consistent leads).\nVariant B: focus on results (specific outcomes you deliver).\nKeep each under 75 words. Professional but conversational tone.\nReply ONLY with valid JSON:\n{"subA":"...","bodyA":"...","subB":"...","bodyB":"..."}`
+    );
+    const p = parseJSON(text);
+    document.getElementById('c-sub-a').value = p.subA||'';
+    document.getElementById('c-body-a').value = p.bodyA||'';
+    document.getElementById('c-sub-b').value = p.subB||'';
+    document.getElementById('c-body-b').value = p.bodyB||'';
+    showAlert('camp-msg','ok','AI generated both variants. Review and edit before saving.');
+  } catch(e) {
+    showAlert('camp-msg','err','Generation failed. Try again.');
+  }
+  btn.disabled=false; btn.innerHTML='<i class="ti ti-sparkles"></i> AI';
+}
+
+function saveCampaign() {
+  const name = document.getElementById('c-name').value.trim();
+  const niche = document.getElementById('c-niche').value.trim();
+  const subA = document.getElementById('c-sub-a').value.trim();
+  const bodyA = document.getElementById('c-body-a').value.trim();
+  const subB = document.getElementById('c-sub-b').value.trim();
+  const bodyB = document.getElementById('c-body-b').value.trim();
+  if (!name) { showAlert('camp-msg','err','Campaign name is required.'); return; }
+  if (!subA || !subB) { showAlert('camp-msg','err','Both subject lines are required.'); return; }
+  const varALeads = S.leads.filter(l=>l.variant==='A').length;
+  const varBLeads = S.leads.filter(l=>l.variant==='B').length;
+  S.camps.push({
+    id: uid(), name, niche, type: 'ab',
+    createdAt: new Date().toISOString(),
+    varA: { subject:subA, body:bodyA, sent:varALeads, opens:0, replies:0 },
+    varB: { subject:subB, body:bodyB, sent:varBLeads, opens:0, replies:0 }
+  });
+  dbSave();
+  ['c-name','c-niche','c-sub-a','c-body-a','c-sub-b','c-body-b'].forEach(id=>document.getElementById(id).value='');
+  togglePanel('camp-form-panel');
+  renderCampaigns();
+}
+
+function simulateResults(id) {
+  S.camps = S.camps.map(c => {
+    if (c.id!==id) return c;
+    return {
+      ...c,
+      varA: {...c.varA, opens:Math.floor(c.varA.sent*.45), replies:Math.floor(c.varA.sent*.09)},
+      varB: {...c.varB, opens:Math.floor(c.varB.sent*.32), replies:Math.floor(c.varB.sent*.06)}
+    };
+  });
+  dbSave(); renderCampaigns(); renderDashboard();
+}
+
+function deleteCampaign(id) {
+  if (!confirm('Delete this campaign?')) return;
+  S.camps = S.camps.filter(c=>c.id!==id);
+  dbSave(); renderCampaigns(); renderDashboard();
+}
+
+function renderCampaigns() {
+  const el = document.getElementById('camp-list');
+  if (!S.camps.length) {
+    el.innerHTML = `<div class="empty"><i class="ti ti-mail"></i><div class="empty-title">No campaigns yet</div><div class="empty-sub">Create your first A/B campaign to split-test subject lines and email copy.<br>The AI will write both variants for you.</div></div>`;
+    return;
+  }
+  el.innerHTML = S.camps.map(c => {
+    const aR = c.varA.sent ? Math.round(c.varA.opens/c.varA.sent*100) : 0;
+    const bR = c.varB.sent ? Math.round(c.varB.opens/c.varB.sent*100) : 0;
+    const w = aR>bR?'A':bR>aR?'B':null;
+    return `<div class="camp-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:3px">${c.name}</div>
+          <div style="font-size:12px;color:var(--text2)">${c.niche||'General'} · Created ${fmtDateShort(c.createdAt)}</div>
+        </div>
+        <div style="display:flex;gap:7px;align-items:center">
+          ${w ? `<span class="tag tag-green">Variant ${w} winning 🏆</span>` : '<span class="tag tag-gray">No data yet</span>'}
+          <button class="btn btn-secondary btn-sm" onclick="simulateResults('${c.id}')"><i class="ti ti-player-play"></i> Simulate</button>
+          <button class="btn-icon" onclick="deleteCampaign('${c.id}')"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+      <div class="ab-grid">
+        ${['A','B'].map(v=>{
+          const vd = v==='A'?c.varA:c.varB;
+          const rate = vd.sent ? Math.round(vd.opens/vd.sent*100) : 0;
+          const isW = w===v;
+          return `<div class="variant${isW?' winning':''}">
+            <div class="variant-label">Variant ${v}${isW?' &nbsp;🏆':''}</div>
+            <div class="variant-subject">"${vd.subject||'No subject set'}"</div>
+            <div class="stats-row">
+              <div class="stat"><div class="stat-val">${vd.sent}</div><div class="stat-lbl">Sent</div></div>
+              <div class="stat"><div class="stat-val">${vd.opens}</div><div class="stat-lbl">Opens</div></div>
+              <div class="stat"><div class="stat-val" style="color:${isW?'var(--bc)':'var(--text)'}">${rate}%</div><div class="stat-lbl">Open %</div></div>
+              <div class="stat"><div class="stat-val">${vd.replies}</div><div class="stat-lbl">Replies</div></div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════
+   PIPELINE
+═══════════════════════════════════════════════════ */
+function moveFromPipeline(id, stage) {
+  if (!stage) return;
+  changeLeadStage(id, stage);
+  renderPipeline();
+}
+
+function renderPipeline() {
+  const el = document.getElementById('pipeline-board');
+  if (!S.leads.length) {
+    el.innerHTML = `<div class="empty" style="width:100%"><i class="ti ti-layout-kanban"></i><div class="empty-title">Pipeline is empty</div><div class="empty-sub">Add leads first, then move them through stages here.</div></div>`;
+    return;
+  }
+  el.innerHTML = STAGES.map(stage => {
+    const sl = S.leads.filter(l=>l.stage===stage);
+    return `<div class="p-col">
+      <div class="p-col-head">
+        <span class="p-col-title">${stage}</span>
+        <span class="p-count">${sl.length}</span>
+      </div>
+      ${sl.length===0?`<div style="text-align:center;padding:16px 8px;font-size:11px;color:var(--text3)">Empty</div>`:''}
+      ${sl.map(lead=>{
+        const name = [lead.firstName,lead.lastName].filter(Boolean).join(' ') || lead.email.split('@')[0];
+        return `<div class="p-card">
+          <div class="p-card-name">${name}</div>
+          <div class="p-card-co">${lead.company}</div>
+          ${lead.score!=null?`<div class="p-card-score" style="color:${scoreColor(lead.score)}">Score: ${lead.score}/10</div>`:''}
+          <select class="p-move" onchange="moveFromPipeline('${lead.id}',this.value)">
+            <option value="">Move to…</option>
+            ${STAGES.filter(s=>s!==stage).map(s=>`<option value="${s}">${s}</option>`).join('')}
+          </select>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════
+   MEETINGS
+═══════════════════════════════════════════════════ */
+function saveMeeting() {
+  const name = document.getElementById('mt-name').value.trim();
+  const date = document.getElementById('mt-date').value;
+  if (!name || !date) { alert('Name and date are required.'); return; }
+  S.meetings.push({
+    id: uid(),
+    name, company: document.getElementById('mt-co').value.trim(),
+    email: document.getElementById('mt-email').value.trim(),
+    date, time: document.getElementById('mt-time').value||'10:00',
+    notes: document.getElementById('mt-notes').value.trim(),
+    status: 'confirmed', createdAt: new Date().toISOString()
+  });
+  dbSave();
+  ['mt-name','mt-co','mt-email','mt-date','mt-notes'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('mt-time').value='10:00';
+  togglePanel('meet-form-panel');
+  renderMeetings(); updateBadges();
+}
+
+function deleteMeeting(id) {
+  if (!confirm('Remove this meeting?')) return;
+  S.meetings = S.meetings.filter(m=>m.id!==id);
+  dbSave(); renderMeetings(); updateBadges();
+}
+
+function renderMeetings() {
+  const now = new Date(); now.setHours(0,0,0,0);
+  const upcoming = S.meetings.filter(m=>new Date(m.date)>=now).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const past = S.meetings.filter(m=>new Date(m.date)<now).sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+  const upEl = document.getElementById('meet-upcoming');
+  const paEl = document.getElementById('meet-past');
+
+  if (!S.meetings.length) {
+    upEl.innerHTML = `<div class="empty"><i class="ti ti-calendar"></i><div class="empty-title">No meetings yet</div><div class="empty-sub">Move a lead to "Call booked" in the Pipeline or<br>add a meeting manually using the button above.</div></div>`;
+    paEl.innerHTML = '';
+    return;
+  }
+
+  upEl.innerHTML = upcoming.length ? `
+    <div class="slbl">Upcoming (${upcoming.length})</div>
+    ${upcoming.map(m=>{
+      const d = new Date(m.date+'T12:00:00');
+      return `<div class="meeting-item">
+        <div class="m-date-box">
+          <div class="m-day">${d.getUTCDate()}</div>
+          <div class="m-month">${d.toLocaleString('en',{month:'short'})}</div>
+        </div>
+        <div class="m-info">
+          <div class="m-name">${m.name}</div>
+          <div class="m-meta">${m.company?m.company+' · ':''}${m.time||''}${m.email?' · '+m.email:''}</div>
+          ${m.notes?`<div class="m-notes">${m.notes}</div>`:''}
+        </div>
+        <span class="tag tag-green">confirmed</span>
+        <button class="btn-icon" onclick="deleteMeeting('${m.id}')" title="Remove"><i class="ti ti-x"></i></button>
+      </div>`;
+    }).join('')}
+  ` : `<div style="padding:16px 0;font-size:13px;color:var(--text2)">No upcoming meetings.</div>`;
+
+  paEl.innerHTML = past.length ? `
+    <div class="slbl" style="margin-top:18px">Past (${past.length})</div>
+    ${past.slice(0,5).map(m=>{
+      const d = new Date(m.date+'T12:00:00');
+      return `<div class="past-item">
+        <div style="font-size:13px;font-weight:600;color:var(--text)">${m.name} <span style="font-weight:400;color:var(--text2)">· ${m.company||''}</span></div>
+        <div style="font-size:12px;color:var(--text2)">${fmtDateShort(m.date)} ${m.time||''}</div>
+      </div>`;
+    }).join('')}
+  ` : '';
+}
+
+/* ═══════════════════════════════════════════════════
+   SETTINGS
+═══════════════════════════════════════════════════ */
+function populateSettings() {
+  const c = S.cfg;
+  document.getElementById('s-hunter').value   = c.hunterKey||'';
+  document.getElementById('s-deal').value     = c.dealValue||2000;
+  document.getElementById('s-appname').value  = c.appName||'LeadFlow';
+  document.getElementById('s-tagline').value  = c.tagline||'AI Lead Generation';
+  document.getElementById('s-color-hex').value = c.color||'#5B6EF5';
+  document.getElementById('s-color-swatch').value = c.color||'#5B6EF5';
+  document.getElementById('s-price').value    = c.agencyPrice||299;
+  const at = document.getElementById('agency-toggle');
+  if (c.agencyMode) { at.classList.add('on'); document.getElementById('agency-panel').style.display='block'; }
+  else { at.classList.remove('on'); document.getElementById('agency-panel').style.display='none'; }
+  document.getElementById('agency-lbl').textContent = c.agencyMode ? 'Agency mode is ON — clients see your brand' : 'Agency mode is OFF';
+  updateDealHint(); updateAgencyCalc();
+}
+
+function syncColor(src, targetId) {
+  document.getElementById(targetId).value = src.value;
+}
+
+function toggleAgencyMode() {
+  const t = document.getElementById('agency-toggle');
+  t.classList.toggle('on');
+  const on = t.classList.contains('on');
+  document.getElementById('agency-panel').style.display = on ? 'block' : 'none';
+  document.getElementById('agency-lbl').textContent = on ? 'Agency mode is ON — clients see your brand' : 'Agency mode is OFF';
+  updateAgencyCalc();
+}
+
+function updateDealHint() {
+  const dv = Number(document.getElementById('s-deal')?.value)||2000;
+  const el = document.getElementById('deal-hint');
+  if (el) el.innerHTML = `At <strong>${fmt(dv)}</strong>/deal you need <strong>${Math.ceil(50000/dv)} closed deals</strong> to hit $50K.`;
+}
+
+function updateAgencyCalc() {
+  const ap = Number(document.getElementById('s-price')?.value)||299;
+  const el = document.getElementById('agency-hint');
+  if (el) {
+    const n = Math.ceil(50000/ap);
+    el.innerHTML = `At <strong>${fmt(ap)}/month</strong>, you need <strong>${n} clients</strong> to hit $50K — roughly <strong>${Math.ceil(n/3)} new clients per month</strong>. Sell subscriptions to other freelancers who want the same system. Your app becomes the product.`;
+  }
+}
+
+function saveSettings() {
+  const t = document.getElementById('agency-toggle');
+  S.cfg = {
+    hunterKey:   document.getElementById('s-hunter').value.trim(),
+    dealValue:   Number(document.getElementById('s-deal').value)||2000,
+    appName:     document.getElementById('s-appname').value.trim()||'LeadFlow',
+    tagline:     document.getElementById('s-tagline').value.trim()||'AI Lead Generation',
+    color:       document.getElementById('s-color-hex').value.trim()||'#5B6EF5',
+    agencyMode:  t.classList.contains('on'),
+    agencyPrice: Number(document.getElementById('s-price').value)||299
+  };
+  dbSave(); applyBranding();
+  const ok = document.getElementById('save-ok');
+  ok.style.display='block'; setTimeout(()=>ok.style.display='none',2500);
+}
+
+/* ═══════════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════════ */
+function showAlert(id, type, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = `alert show alert-${type==='ok'?'ok':type==='info'?'info':'err'}`;
+  el.textContent = msg;
+  if (type==='ok') setTimeout(()=>{ el.className='alert'; }, 4000);
+}
+
+/* ═══════════════════════════════════════════════════
+   BOOT
+═══════════════════════════════════════════════════ */
+dbLoad();
+applyBranding();
+renderDashboard();
+renderLeads();
+renderCampaigns();
+renderPipeline();
+renderMeetings();
+populateSettings();
+</script>
+</body>
+</html>
