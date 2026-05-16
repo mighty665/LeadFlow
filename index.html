@@ -590,6 +590,7 @@ select.inp{cursor:pointer}
       <div class="ph-sub">Configure your workspace</div>
     </div>
     <button class="btn btn-primary" onclick="saveSettings()"><i class="ti ti-device-floppy"></i> Save settings</button>
+    <button class="btn btn-secondary" onclick="saveSettings();testKeys()"><i class="ti ti-plug"></i> Save &amp; test connections</button>
   </div>
 
   <div class="settings-grid">
@@ -597,15 +598,21 @@ select.inp{cursor:pointer}
     <div class="settings-section">
       <div class="settings-title"><i class="ti ti-key"></i> API Keys</div>
       <div class="field">
-        <label class="field-label">Hunter.io API key</label>
+        <label class="field-label">Hunter.io API key <span style="color:var(--red)">*</span></label>
         <input class="inp" id="s-hunter" type="password" placeholder="Paste your Hunter.io key"/>
-        <div class="field-hint">Get your free key at hunter.io → Dashboard → API</div>
+        <div class="field-hint">Get free key at <strong>hunter.io</strong> → Sign in → API</div>
+      </div>
+      <div class="field" style="margin-top:10px">
+        <label class="field-label">Anthropic (Claude) API key <span style="color:var(--red)">*</span></label>
+        <input class="inp" id="s-claude" type="password" placeholder="sk-ant-api03-…"/>
+        <div class="field-hint">Get key at <strong>console.anthropic.com</strong> → API Keys → Create key. Powers AI scoring, email generation &amp; company discovery.</div>
       </div>
       <div class="field" style="margin-top:10px">
         <label class="field-label">Average deal value ($)</label>
         <input class="inp" id="s-deal" type="number" placeholder="2000" oninput="updateDealHint()"/>
       </div>
       <div class="hint" id="deal-hint">Set your average deal value to see revenue forecasts.</div>
+      <div id="key-status" style="margin-top:10px"></div>
     </div>
 
     <!-- White-label -->
@@ -676,6 +683,7 @@ let S = {
   meetings: [],
   cfg: {
     hunterKey: '',
+    claudeKey: '',
     dealValue: 2000,
     appName: 'LeadFlow',
     tagline: 'AI Lead Generation',
@@ -690,7 +698,7 @@ function dbLoad() {
     const raw = localStorage.getItem(DB_KEY);
     if (raw) S = Object.assign(S, JSON.parse(raw));
     // Ensure cfg has all keys
-    S.cfg = Object.assign({hunterKey:'',dealValue:2000,appName:'LeadFlow',tagline:'AI Lead Generation',color:'#5B6EF5',agencyMode:false,agencyPrice:299}, S.cfg);
+    S.cfg = Object.assign({hunterKey:'',claudeKey:'',dealValue:2000,appName:'LeadFlow',tagline:'AI Lead Generation',color:'#5B6EF5',agencyMode:false,agencyPrice:299}, S.cfg);
   } catch(e) { console.warn('Load error',e); }
 }
 
@@ -749,9 +757,16 @@ function applyBranding() {
    CLAUDE API
 ═══════════════════════════════════════════════════ */
 async function askClaude(prompt, maxTokens=800) {
+  const key = S.cfg.claudeKey;
+  if (!key) throw new Error('No Anthropic API key. Go to Settings and add your Claude API key.');
   const r = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
       max_tokens: maxTokens,
@@ -1342,6 +1357,7 @@ function renderMeetings() {
 function populateSettings() {
   const c = S.cfg;
   document.getElementById('s-hunter').value   = c.hunterKey||'';
+  document.getElementById('s-claude').value   = c.claudeKey||'';
   document.getElementById('s-deal').value     = c.dealValue||2000;
   document.getElementById('s-appname').value  = c.appName||'LeadFlow';
   document.getElementById('s-tagline').value  = c.tagline||'AI Lead Generation';
@@ -1387,6 +1403,7 @@ function saveSettings() {
   const t = document.getElementById('agency-toggle');
   S.cfg = {
     hunterKey:   document.getElementById('s-hunter').value.trim(),
+    claudeKey:   document.getElementById('s-claude').value.trim(),
     dealValue:   Number(document.getElementById('s-deal').value)||2000,
     appName:     document.getElementById('s-appname').value.trim()||'LeadFlow',
     tagline:     document.getElementById('s-tagline').value.trim()||'AI Lead Generation',
@@ -1397,6 +1414,44 @@ function saveSettings() {
   dbSave(); applyBranding();
   const ok = document.getElementById('save-ok');
   ok.style.display='block'; setTimeout(()=>ok.style.display='none',2500);
+}
+
+/* ═══════════════════════════════════════════════════
+   KEY VALIDATION
+═══════════════════════════════════════════════════ */
+async function testKeys() {
+  const hKey = document.getElementById('s-hunter').value.trim();
+  const cKey = document.getElementById('s-claude').value.trim();
+  const statusEl = document.getElementById('key-status');
+  statusEl.innerHTML = '<div class="hint"><span class="spinner" style="border-color:var(--border2);border-top-color:var(--bc)"></span> Testing connections…</div>';
+
+  let results = [];
+
+  // Test Hunter.io
+  if (hKey) {
+    try {
+      const r = await fetch(`https://api.hunter.io/v2/account?api_key=${hKey}`);
+      const d = await r.json();
+      if (d.data) results.push('<span class="tag tag-green">✓ Hunter.io connected — ' + (d.data.requests?.searches?.available||'?') + ' searches left</span>');
+      else results.push('<span class="tag tag-red">✗ Hunter.io key invalid</span>');
+    } catch { results.push('<span class="tag tag-red">✗ Hunter.io connection failed</span>'); }
+  } else { results.push('<span class="tag tag-amber">⚠ Hunter.io key not set</span>'); }
+
+  // Test Claude
+  if (cKey) {
+    try {
+      const r = await fetch('https://api.anthropic.com/v1/messages', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':cKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:10,messages:[{role:'user',content:'hi'}]})
+      });
+      const d = await r.json();
+      if (d.content) results.push('<span class="tag tag-green">✓ Claude API connected</span>');
+      else results.push('<span class="tag tag-red">✗ Claude key invalid: ' + (d.error?.message||'unknown') + '</span>');
+    } catch(e) { results.push('<span class="tag tag-red">✗ Claude connection failed: ' + e.message + '</span>'); }
+  } else { results.push('<span class="tag tag-amber">⚠ Claude API key not set</span>'); }
+
+  statusEl.innerHTML = '<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:4px">' + results.join('') + '</div>';
 }
 
 /* ═══════════════════════════════════════════════════
