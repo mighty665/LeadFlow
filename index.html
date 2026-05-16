@@ -395,23 +395,89 @@ select.inp{cursor:pointer}
     </div>
   </div>
 
-  <!-- Search panel -->
+  <!-- Discover panel -->
   <div class="form-panel" id="search-panel">
-    <div class="card-title"><i class="ti ti-brand-google"></i> Hunter.io Contact Search</div>
-    <div class="input-group" style="margin-bottom:8px">
-      <input class="inp" id="hunt-domain" placeholder="Enter company domain (e.g. hubspot.com, stripe.com)"/>
-      <select class="inp" id="hunt-dept" style="max-width:160px">
-        <option value="">All departments</option>
-        <option value="executive">Executive</option>
-        <option value="sales">Sales</option>
-        <option value="marketing">Marketing</option>
-        <option value="finance">Finance</option>
-        <option value="it">IT</option>
-      </select>
-      <button class="btn btn-primary" id="hunt-btn" onclick="runHunterSearch()"><i class="ti ti-search"></i> Search</button>
+    <div class="card-title"><i class="ti ti-world-search"></i> Discover Contacts</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.6">
+      Enter your target criteria — Claude AI finds matching real companies, then Hunter.io pulls verified emails from each one automatically.
     </div>
-    <div class="hint">Hunter.io finds verified email addresses for any company domain. Add your API key in Settings to enable.</div>
+    <div class="form-grid-2" style="gap:10px;margin-bottom:10px">
+      <div class="field">
+        <label class="field-label">Industry <span style="color:var(--red)">*</span></label>
+        <select class="inp" id="d-industry">
+          <option value="">Select industry…</option>
+          <option>SaaS / Software</option>
+          <option>Marketing Agencies</option>
+          <option>Real Estate</option>
+          <option>E-commerce</option>
+          <option>Recruiting / Staffing</option>
+          <option>Legal Services</option>
+          <option>Financial Services</option>
+          <option>Healthcare / Medtech</option>
+          <option>Logistics / Supply Chain</option>
+          <option>Construction</option>
+          <option>Education / EdTech</option>
+          <option>Consulting</option>
+          <option>Insurance</option>
+          <option>Manufacturing</option>
+          <option>Retail</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label">Location</label>
+        <input class="inp" id="d-location" placeholder="e.g. United States, London, Dubai"/>
+      </div>
+      <div class="field">
+        <label class="field-label">Company size</label>
+        <select class="inp" id="d-size">
+          <option value="">Any size</option>
+          <option value="startup">Startup (1–10)</option>
+          <option value="small">Small (10–50)</option>
+          <option value="medium">Medium (50–200)</option>
+          <option value="large">Large (200–1000)</option>
+          <option value="enterprise">Enterprise (1000+)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label">Job title / Department to target</label>
+        <select class="inp" id="d-dept">
+          <option value="">Any (all contacts)</option>
+          <option value="executive">C-Suite / Executive</option>
+          <option value="sales">Sales</option>
+          <option value="marketing">Marketing</option>
+          <option value="finance">Finance</option>
+          <option value="it">IT / Engineering</option>
+          <option value="hr">HR / People</option>
+          <option value="operations">Operations</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label">Keywords (optional)</label>
+        <input class="inp" id="d-keywords" placeholder="e.g. B2B, funded, growth stage, Series A"/>
+      </div>
+      <div class="field">
+        <label class="field-label">Number of companies to find</label>
+        <select class="inp" id="d-count">
+          <option value="5">5 companies (~50 contacts)</option>
+          <option value="10" selected>10 companies (~100 contacts)</option>
+          <option value="15">15 companies (~150 contacts)</option>
+          <option value="20">20 companies (~200 contacts)</option>
+        </select>
+      </div>
+    </div>
+    <!-- Progress area -->
+    <div id="discover-progress" style="display:none;margin-bottom:10px">
+      <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px" id="dp-label">Finding companies…</div>
+      <div style="background:var(--surface2);border-radius:6px;height:8px;overflow:hidden">
+        <div id="dp-bar" style="height:100%;background:linear-gradient(90deg,var(--bc),#8B5CF6);border-radius:6px;transition:width .4s ease;width:0%"></div>
+      </div>
+      <div id="dp-companies" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px"></div>
+    </div>
     <div class="alert" id="hunt-msg"></div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn btn-primary" id="hunt-btn" onclick="runDiscover()"><i class="ti ti-sparkles"></i> Discover contacts</button>
+      <button class="btn btn-secondary" onclick="togglePanel('search-panel')">Cancel</button>
+    </div>
   </div>
 
   <!-- Filters -->
@@ -817,56 +883,124 @@ function updateBadges() {
 ═══════════════════════════════════════════════════ */
 let leadStageFilter = 'all';
 
-async function runHunterSearch() {
-  const domain = document.getElementById('hunt-domain').value.trim();
-  const dept   = document.getElementById('hunt-dept').value;
-  const key    = S.cfg.hunterKey;
-  const btn    = document.getElementById('hunt-btn');
+async function runDiscover() {
+  const industry = document.getElementById('d-industry').value;
+  const location = document.getElementById('d-location').value.trim();
+  const size     = document.getElementById('d-size').value;
+  const dept     = document.getElementById('d-dept').value;
+  const keywords = document.getElementById('d-keywords').value.trim();
+  const count    = parseInt(document.getElementById('d-count').value) || 10;
+  const key      = S.cfg.hunterKey;
+  const btn      = document.getElementById('hunt-btn');
 
-  if (!domain) { showAlert('hunt-msg','err','Please enter a domain.'); return; }
-  if (!key) { showAlert('hunt-msg','err','No Hunter.io key found. Go to Settings and add it.'); return; }
+  if (!industry) { showAlert('hunt-msg','err','Please select an industry.'); return; }
+  if (!key) { showAlert('hunt-msg','err','No Hunter.io key found. Go to Settings and add it first.'); return; }
 
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Searching…';
+  btn.innerHTML = '<span class="spinner"></span> Working…';
+
+  const progressEl = document.getElementById('discover-progress');
+  const labelEl    = document.getElementById('dp-label');
+  const barEl      = document.getElementById('dp-bar');
+  const coEl       = document.getElementById('dp-companies');
+  progressEl.style.display = 'block';
+  coEl.innerHTML = '';
+  barEl.style.width = '5%';
+  labelEl.textContent = 'Step 1/2 — Claude AI is finding matching companies…';
 
   try {
-    let url = `https://api.hunter.io/v2/domain-search?domain=${encodeURIComponent(domain)}&limit=20&api_key=${key}`;
-    if (dept) url += `&department=${dept}`;
-    const res = await fetch(url);
-    const data = await res.json();
+    // ── Step 1: Claude generates real company domains ──
+    const sizeDesc = { startup:'1–10 employees', small:'10–50 employees', medium:'50–200 employees', large:'200–1000 employees', enterprise:'1000+ employees' }[size] || 'any size';
+    const prompt = `You are a B2B prospecting expert. Give me a list of ${count} real companies that match ALL of these criteria:
+- Industry: ${industry}
+- Location: ${location || 'anywhere (global)'}
+- Company size: ${sizeDesc}
+${keywords ? `- Additional keywords: ${keywords}` : ''}
 
-    if (data.errors && data.errors.length) {
-      showAlert('hunt-msg','err', data.errors[0].details || 'Hunter.io returned an error.'); return;
+Requirements:
+- These must be REAL, currently operating companies with real websites
+- Choose companies that are likely to need outbound lead generation services
+- Prefer companies that are active and growing
+- Include a good mix of well-known and mid-tier companies
+
+Reply ONLY with valid JSON, no other text:
+{"companies":[{"name":"Company Name","domain":"companydomain.com","description":"one sentence about what they do and why they need lead gen"}]}`;
+
+    const text = await askClaude(prompt, 1000);
+    const parsed = parseJSON(text);
+    const companies = parsed.companies || [];
+
+    if (!companies.length) {
+      showAlert('hunt-msg','err','Claude could not find matching companies. Try different criteria.');
+      progressEl.style.display='none'; return;
     }
 
-    const emails = data.data?.emails || [];
-    if (!emails.length) { showAlert('hunt-msg','info','No emails found for this domain.'); return; }
+    // Show company chips
+    coEl.innerHTML = companies.map(c =>
+      `<span class="tag tag-gray" id="chip-${c.domain}" style="font-size:11px">${c.name}</span>`
+    ).join('');
 
-    let added = 0;
-    emails.forEach(e => {
-      if (!S.leads.find(l => l.email===e.value)) {
-        S.leads.push({
-          id: uid(), email: e.value,
-          firstName: e.first_name||'', lastName: e.last_name||'',
-          position: e.position||'', department: e.department||'',
-          company: data.data.organization || domain, domain,
-          score: null, scoreReason: '',
-          stage: 'New', variant: Math.random()>.5?'A':'B',
-          createdAt: new Date().toISOString()
+    barEl.style.width = '20%';
+    labelEl.textContent = `Step 2/2 — Searching Hunter.io for contacts at ${companies.length} companies…`;
+
+    // ── Step 2: Hunter.io search for each domain ──
+    let totalAdded = 0;
+    let done = 0;
+
+    for (const co of companies) {
+      const chip = document.getElementById('chip-'+co.domain);
+      if (chip) { chip.className='tag tag-amber'; chip.innerHTML=`<span class="spinner" style="border-color:var(--amber);border-top-color:var(--amber);width:10px;height:10px"></span> ${co.name}`; }
+
+      try {
+        let url = `https://api.hunter.io/v2/domain-search?domain=${encodeURIComponent(co.domain)}&limit=10&api_key=${key}`;
+        if (dept) url += `&department=${dept}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const emails = data.data?.emails || [];
+        let addedHere = 0;
+
+        emails.forEach(e => {
+          if (!S.leads.find(l => l.email===e.value)) {
+            S.leads.push({
+              id: uid(), email: e.value,
+              firstName: e.first_name||'', lastName: e.last_name||'',
+              position: e.position||'', department: e.department||'',
+              company: data.data?.organization || co.name,
+              domain: co.domain, companyDesc: co.description||'',
+              industry, location,
+              score: null, scoreReason: '',
+              stage: 'New', variant: Math.random()>.5?'A':'B',
+              createdAt: new Date().toISOString()
+            });
+            addedHere++; totalAdded++;
+          }
         });
-        added++;
-      }
-    });
 
-    dbSave();
-    showAlert('hunt-msg','ok',`Added ${added} new contacts from ${domain} (${emails.length-added} already in list).`);
-    renderLeads(); renderDashboard();
+        if (chip) {
+          chip.className = addedHere>0 ? 'tag tag-green' : 'tag tag-gray';
+          chip.textContent = `${co.name} (${addedHere})`;
+        }
+      } catch {
+        if (chip) { chip.className='tag tag-red'; chip.textContent=co.name+' ✗'; }
+      }
+
+      done++;
+      barEl.style.width = Math.round(20 + (done/companies.length)*78) + '%';
+      labelEl.textContent = `Step 2/2 — Searched ${done}/${companies.length} companies… ${totalAdded} contacts found`;
+      dbSave(); renderLeads(); renderDashboard();
+    }
+
+    barEl.style.width = '100%';
+    labelEl.textContent = `✓ Done! Found ${totalAdded} new contacts across ${companies.length} companies.`;
+    showAlert('hunt-msg','ok',`Added ${totalAdded} verified contacts from ${companies.length} ${industry} companies${location?' in '+location:''}.`);
+
   } catch(err) {
-    showAlert('hunt-msg','err','Could not connect to Hunter.io. Check your API key and internet connection.');
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '<i class="ti ti-search"></i> Search';
+    showAlert('hunt-msg','err','Something went wrong: ' + (err.message||'Unknown error'));
+    progressEl.style.display='none';
   }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ti ti-sparkles"></i> Discover contacts';
 }
 
 function filterLeads(stage, btn) {
