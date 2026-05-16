@@ -397,9 +397,9 @@ select.inp{cursor:pointer}
 
   <!-- Discover panel -->
   <div class="form-panel" id="search-panel">
-    <div class="card-title"><i class="ti ti-world-search"></i> Discover Contacts</div>
+    <div class="card-title"><i class="ti ti-world-search"></i> Discover Contacts via Hunter.io</div>
     <div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.6">
-      Enter your target criteria — Claude AI finds matching real companies, then Hunter.io pulls verified emails from each one automatically.
+      Select your target criteria — Hunter.io searches verified contacts from matching companies automatically.
     </div>
     <div class="form-grid-2" style="gap:10px;margin-bottom:10px">
       <div class="field">
@@ -415,72 +415,77 @@ select.inp{cursor:pointer}
           <option>Financial Services</option>
           <option>Healthcare / Medtech</option>
           <option>Logistics / Supply Chain</option>
-          <option>Construction</option>
           <option>Education / EdTech</option>
           <option>Consulting</option>
-          <option>Insurance</option>
+          <option>Media / Publishing</option>
           <option>Manufacturing</option>
           <option>Retail</option>
         </select>
       </div>
       <div class="field">
-        <label class="field-label">Location</label>
-        <input class="inp" id="d-location" placeholder="e.g. United States, London, Dubai"/>
-      </div>
-      <div class="field">
-        <label class="field-label">Company size</label>
-        <select class="inp" id="d-size">
-          <option value="">Any size</option>
-          <option value="startup">Startup (1–10)</option>
-          <option value="small">Small (10–50)</option>
-          <option value="medium">Medium (50–200)</option>
-          <option value="large">Large (200–1000)</option>
-          <option value="enterprise">Enterprise (1000+)</option>
+        <label class="field-label">Country</label>
+        <select class="inp" id="d-country">
+          <option value="Global">🌍 All Countries (Global)</option>
+          <option value="United States">🇺🇸 United States</option>
+          <option value="United Kingdom">🇬🇧 United Kingdom</option>
+          <option value="Canada">🇨🇦 Canada</option>
+          <option value="Australia">🇦🇺 Australia</option>
+          <option value="Germany">🇩🇪 Germany</option>
+          <option value="France">🇫🇷 France</option>
+          <option value="Netherlands">🇳🇱 Netherlands</option>
+          <option value="Sweden">🇸🇪 Sweden</option>
+          <option value="UAE">🇦🇪 UAE</option>
+          <option value="Saudi Arabia">🇸🇦 Saudi Arabia</option>
+          <option value="Egypt">🇪🇬 Egypt</option>
+          <option value="India">🇮🇳 India</option>
+          <option value="Singapore">🇸🇬 Singapore</option>
+          <option value="South Africa">🇿🇦 South Africa</option>
+          <option value="Nigeria">🇳🇬 Nigeria</option>
+          <option value="Brazil">🇧🇷 Brazil</option>
+          <option value="Mexico">🇲🇽 Mexico</option>
+          <option value="Israel">🇮🇱 Israel</option>
+          <option value="Japan">🇯🇵 Japan</option>
+          <option value="New Zealand">🇳🇿 New Zealand</option>
         </select>
       </div>
       <div class="field">
-        <label class="field-label">Job title / Department to target</label>
+        <label class="field-label">Department to target</label>
         <select class="inp" id="d-dept">
-          <option value="">Any (all contacts)</option>
+          <option value="">All contacts</option>
           <option value="executive">C-Suite / Executive</option>
           <option value="sales">Sales</option>
           <option value="marketing">Marketing</option>
           <option value="finance">Finance</option>
           <option value="it">IT / Engineering</option>
-          <option value="hr">HR / People</option>
+          <option value="hr">HR / People ops</option>
           <option value="operations">Operations</option>
         </select>
       </div>
       <div class="field">
-        <label class="field-label">Keywords (optional)</label>
-        <input class="inp" id="d-keywords" placeholder="e.g. B2B, funded, growth stage, Series A"/>
-      </div>
-      <div class="field">
-        <label class="field-label">Number of companies to find</label>
+        <label class="field-label">Companies to search</label>
         <select class="inp" id="d-count">
-          <option value="5">5 companies (~50 contacts)</option>
-          <option value="10" selected>10 companies (~100 contacts)</option>
-          <option value="15">15 companies (~150 contacts)</option>
-          <option value="20">20 companies (~200 contacts)</option>
+          <option value="5">5 companies</option>
+          <option value="10" selected>10 companies</option>
+          <option value="15">15 companies</option>
+          <option value="20">20 companies</option>
         </select>
       </div>
     </div>
-    <!-- Progress area -->
     <div id="discover-progress" style="display:none;margin-bottom:10px">
-      <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px" id="dp-label">Finding companies…</div>
+      <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px" id="dp-label">Searching…</div>
       <div style="background:var(--surface2);border-radius:6px;height:8px;overflow:hidden">
         <div id="dp-bar" style="height:100%;background:linear-gradient(90deg,var(--bc),#8B5CF6);border-radius:6px;transition:width .4s ease;width:0%"></div>
       </div>
       <div id="dp-companies" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px"></div>
     </div>
     <div class="alert" id="hunt-msg"></div>
-    <div style="display:flex;gap:8px;margin-top:4px">
-      <button class="btn btn-primary" id="hunt-btn" onclick="runDiscover()"><i class="ti ti-sparkles"></i> Discover contacts</button>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-primary" id="hunt-btn" onclick="runDiscover()"><i class="ti ti-search"></i> Find contacts</button>
       <button class="btn btn-secondary" onclick="togglePanel('search-panel')">Cancel</button>
     </div>
   </div>
 
-  <!-- Filters -->
+    <!-- Filters -->
   <div class="filters" id="lead-filter-row">
     <button class="filter-pill active" onclick="filterLeads('all',this)">All <span id="fl-all">0</span></button>
     <button class="filter-pill" onclick="filterLeads('New',this)">New <span id="fl-new">0</span></button>
@@ -898,126 +903,216 @@ function updateBadges() {
 ═══════════════════════════════════════════════════ */
 let leadStageFilter = 'all';
 
+/* ═══════════════════════════════════════════════════
+   COMPANY DATABASE — curated real domains by industry + country
+═══════════════════════════════════════════════════ */
+const COMPANY_DB = {
+  'SaaS / Software': {
+    'United States': ['hubspot.com','salesforce.com','zendesk.com','intercom.com','drift.com','clickup.com','monday.com','airtable.com','figma.com','mailchimp.com','activecampaign.com','pipedrive.com','close.com','outreach.io','salesloft.com','gong.io','zoominfo.com','apollo.io','lemlist.com','reply.io','instantly.ai','smartlead.ai','woodpecker.co','hunter.io','snov.io'],
+    'United Kingdom': ['sage.com','xero.com','deputy.com','brighthr.com','chargebee.com','paddle.com','pendo.io','mixpanel.com','hotjar.com','contentful.com','typeform.com','miro.com','loom.com','notion.so','calendly.com'],
+    'Canada': ['hootsuite.com','shopify.com','freshbooks.com','wealthsimple.com','clearco.com','ecobee.com','tulip.io','clio.com','ownr.co','bench.co'],
+    'Australia': ['canva.com','atlassian.com','wisepops.com','deputy.com','employment-hero.com','go1.com','culture-amp.com','safety-culture.com','simpro.com','buildxact.com'],
+    'Germany': ['personio.de','commercetools.com','re-cap.com','taxfix.de','gorillas.io','flixbus.com','sumup.com','n26.com','staffbase.com','adjust.com'],
+    'Israel': ['monday.com','wix.com','similarweb.com','kaltura.com','outbrain.com','taboola.com','cyberark.com','varonis.com','armis.com','snyk.io'],
+    'India': ['freshworks.com','zoho.com','chargebee.com','hasura.io','browserstack.com','postman.com','razorpay.com','clevertap.com','exotel.com','leadsquared.com'],
+    'Singapore': ['carousell.com','grab.com','sea.com','patsnap.com','trax.ai','ninjavan.co','janio.asia','eko.com','workato.com','intellect.co'],
+    'Global': ['slack.com','notion.so','loom.com','calendly.com','zapier.com','make.com','typeform.com','webflow.com','framer.com','superhuman.com']
+  },
+  'Marketing Agencies': {
+    'United States': ['wpromote.com','ignitevisibility.com','disruptiveadvertising.com','webfx.com','directive.com','singlegrain.com','thinkwithgoogle.com','tinuiti.com','merkle.com','dentsu.com','publicis.com','ogilvy.com','havas.com','mccann.com','bbdo.com','ddb.com','grey.com','saatchi.com','leo-burnett.com','foote-cone.com'],
+    'United Kingdom': ['wunderman.com','rga.com','adam-eve.com','mother.com','bartle-bogle.com','amvbbdo.com','greyuk.com','jwtintelligence.com','dlkw.com','vccp.com'],
+    'UAE': ['digitomark.ae','bluedigital.ae','nexa.ae','socialeyez.com','amplify.ae','chain-reaction.com','primegroup.ae','traffic-digital.com','babelagency.com'],
+    'Egypt': ['valeo.com','arabiashark.com','kijamii.com','horizons.com','dmission.net','bdigitall.com','arabianmarks.com','socialbakers.com'],
+    'Saudi Arabia': ['webmaster.com.sa','socialeyez.com','traffic-digital.com','nexa.ae','havas.com','wunderman.com','mcgarrybowen.com'],
+    'South Africa': ['acceleration.agency','hoorah.co.za','retroviral.co.za','penquin.co.za','digital-kungfu.com','brandformance.co.za'],
+    'Australia': ['red-agency.com.au','we-are-social.com','dentsu.com','tbwa.com.au','mccann.com.au','havas.com.au','ogilvy.com.au','empower.com.au'],
+    'Canada': ['publicis.ca','ogilvy.ca','lg2.com','sid-lee.com','cossette.com','taxi.ca','ddb.ca','bbdo.ca'],
+    'Global': ['wpp.com','omnicom.com','ipg.com','publicisgroupe.com','dentsuaegis.com','havasgroup.com']
+  },
+  'Real Estate': {
+    'United States': ['redfin.com','zillow.com','compass.com','kw.com','century21.com','coldwellbanker.com','sothebysrealty.com','corcoran.com','berkshirehathawayhs.com','realogy.com','remax.com','era.com','weichert.com','windermere.com','long-foster.com','howardhanna.com'],
+    'United Kingdom': ['rightmove.co.uk','zoopla.co.uk','savills.com','knightfrank.com','jll.com','cbre.com','colliers.com','cushmanwakefield.com','hamptons.co.uk','foxtons.co.uk'],
+    'UAE': ['propertyfinder.ae','bayut.com','hamptons-international.com','allsopp-allsopp.com','jll.ae','cbre.ae','knightfrank.ae','savills.ae','damacproperties.com','emaar.com'],
+    'Saudi Arabia': ['saa.com.sa','century21.com.sa','ara.com.sa','remax.com.sa','jll.com.sa','cbre.com.sa'],
+    'Egypt': ['aqarmap.com','propertyfinder.com.eg','nawy.com','sodic.com','palm-hills.com','arabian-developments.com','mnhd.com'],
+    'Australia': ['realestate.com.au','domain.com.au','lj-hooker.com.au','raywhite.com','harcourts.com.au','century21.com.au','barryplant.com.au'],
+    'Canada': ['remax.ca','royallepage.ca','century21.ca','sutton.com','exp-realty.com','zoocasa.com'],
+    'Global': ['jll.com','cbre.com','cushmanwakefield.com','colliers.com','savills.com','knightfrank.com']
+  },
+  'E-commerce': {
+    'United States': ['shopify.com','bigcommerce.com','woocommerce.com','magento.com','volusion.com','3dcart.com','squarespace.com','wix.com','ecwid.com','prestashop.com','yotpo.com','klaviyo.com','gorgias.com','rechargepayments.com','postscript.io','attentive.com','okendo.io'],
+    'United Kingdom': ['notonthehighstreet.com','asos.com','made.com','farfetch.com','missguided.co.uk','boohoo.com','gymshark.com','prettylittlething.com','moonpig.com'],
+    'UAE': ['noon.com','souq.com','mumzworld.com','namshi.com','sivvi.com','awok.com','wishlist.ae','firstcry.ae'],
+    'Germany': ['zalando.de','otto.de','aboutyou.de','lesara.de','mytheresa.com','windeln.de','flaconi.de'],
+    'Australia': ['catch.com.au','kogan.com','booktopia.com.au','myer.com.au','davidjones.com.au','theiconic.com.au'],
+    'India': ['flipkart.com','myntra.com','nykaa.com','meesho.com','snapdeal.com','purplle.com','mamaearth.in'],
+    'Global': ['shopify.com','bigcommerce.com','woocommerce.com','magento.com','salesforce.com','klaviyo.com']
+  },
+  'Recruiting / Staffing': {
+    'United States': ['indeed.com','linkedin.com','ziprecruiter.com','glassdoor.com','lever.co','greenhouse.io','workday.com','jobvite.com','icims.com','smartrecruiters.com','bamboohr.com','gusto.com','rippling.com','manpower.com','adecco.com','randstad.com','roberthalf.com','kforce.com','staffmark.com'],
+    'United Kingdom': ['reed.co.uk','totaljobs.com','cv-library.co.uk','michaelpage.co.uk','hays.com','pagegroup.com','adecco.co.uk','manpower.co.uk','randstad.co.uk','roberthalf.co.uk'],
+    'UAE': ['bayt.com','naukrigulf.com','gulftalent.com','monstergulf.com','dubizzle.com','hays.ae','michaelpage.ae','adecco.ae'],
+    'Australia': ['seek.com.au','careerone.com.au','michaelpage.com.au','hays.com.au','adecco.com.au','manpower.com.au'],
+    'India': ['naukri.com','monster.com','shine.com','timesjobs.com','apna.co','foundit.in','hirist.com'],
+    'Global': ['linkedin.com','indeed.com','ziprecruiter.com','greenhouse.io','lever.co','workday.com']
+  },
+  'Financial Services': {
+    'United States': ['stripe.com','plaid.com','brex.com','ramp.com','mercury.com','gusto.com','pilot.com','bench.co','wave.com','kabbage.com','fundbox.com','clearbanc.com','carta.com','angellist.com','robinhood.com'],
+    'United Kingdom': ['revolut.com','monzo.com','starling.com','transferwise.com','iwoca.com','funding-circle.com','oaknorth.co.uk','tide.co','coconut.co','countingup.com'],
+    'UAE': ['digifinance.ae','now-money.ae','beehive.ae','business-bay.ae','sarwa.co','ziina.com','tabby.ai','tamara.co'],
+    'Saudi Arabia': ['stc-pay.com.sa','tamara.co','tabby.ai','hala.sa','nupay.sa'],
+    'Egypt': ['fawry.com','paymob.com','vodafonecash.com.eg','instapay.eg','khazna.io','dayra.me'],
+    'Global': ['stripe.com','transferwise.com','revolut.com','payoneer.com','paypal.com','adyen.com']
+  },
+  'Healthcare / Medtech': {
+    'United States': ['teladoc.com','zocdoc.com','hims.com','modernhealth.com','cerebral.com','lyra.com','caremore.com','one-medical.com','nurx.com','ro.co','truepill.com','capsule.com'],
+    'United Kingdom': ['babylon.com','doctorcare.co.uk','push-dr.com','medicinedirect.co.uk','healios.com','cera.care','vida.health'],
+    'UAE': ['healthhub.ae','altibbi.com','vezeeta.com','shezlong.com','doctoruna.com','almajdmedical.ae'],
+    'Australia': ['medibank.com.au','hcf.com.au','bupa.com.au','nib.com.au','cliniko.com','healthengine.com.au'],
+    'Global': ['healtheon.com','epic.com','cerner.com','allscripts.com','athenahealth.com','veeva.com']
+  },
+  'Consulting': {
+    'United States': ['mckinsey.com','bcg.com','bain.com','deloitte.com','pwc.com','kpmg.com','ey.com','accenture.com','boozallen.com','oliverwyman.com','atkearney.com','rolandberger.com','strategyand.pwc.com','l-e-k.com','huron.com'],
+    'United Kingdom': ['mckinsey.com/uk','bcg.com/offices/uk','deloitte.co.uk','pwc.co.uk','kpmg.co.uk','ey.com/uk','capgemini.com','pa.com','canarytechnology.com'],
+    'UAE': ['strategyand.pwc.com','mckinsey.com','bcg.com','deloitte.ae','pwc.com/ae','kpmg.com/ae','ey.com/ae','accenture.ae'],
+    'Global': ['mckinsey.com','bcg.com','bain.com','deloitte.com','pwc.com','kpmg.com','ey.com','accenture.com']
+  },
+  'Logistics / Supply Chain': {
+    'United States': ['flexport.com','convoy.com','transfix.com','loadsmart.com','freightos.com','project44.com','fourkites.com','samsara.com','keeptruckin.com','shipbob.com','shipmonk.com','whiplash.com'],
+    'United Kingdom': ['parcelforce.com','dpd.co.uk','yodel.co.uk','hermes.world','whistl.co.uk','intertek.com','agility.com'],
+    'UAE': ['aramex.com','fetchr.us','ninjavan.co','hellmann.com','dhl.ae','fedex.ae','agility.com'],
+    'Global': ['dhl.com','fedex.com','ups.com','maersk.com','kuehne-nagel.com','dsv.com','flexport.com']
+  },
+  'Education / EdTech': {
+    'United States': ['coursera.org','udemy.com','linkedin.com','masterclass.com','duolingo.com','kahoot.com','chegg.com','powerschool.com','instructure.com','d2l.com','turnitin.com','proctorio.com'],
+    'United Kingdom': ['futurelearn.com','pearson.com','capita.com','tes.com','twinkl.com','sparx.co.uk','eedi.com'],
+    'UAE': ['almentor.net','edraak.org','skolera.com','classera.com','Edulane.com'],
+    'India': ['byju.com','unacademy.com','vedantu.com','upgrad.com','simplilearn.com','toppr.com','whitehatjr.com'],
+    'Australia': ['edapp.com','canopy-education.com.au','tes.com','9to5mac.com'],
+    'Global': ['coursera.org','udemy.com','edx.org','duolingo.com','masterclass.com','skillshare.com']
+  },
+  'Legal Services': {
+    'United States': ['clio.com','mycase.com','lawpay.com','legalzoom.com','rocket-lawyer.com','simplylegal.com','contractpodai.com','luminance.com','lawgeex.com','evisort.com'],
+    'United Kingdom': ['linklaters.com','cliffordchance.com','freshfields.com','allenovery.com','ashurst.com','slaughterandmay.com','herbertsmithfreehills.com','travers-smith.com'],
+    'UAE': ['clarionsolicitors.com','hadef.com','clydeco.ae','dentons.ae','freshfields.ae','tamimi.com'],
+    'Global': ['legalzoom.com','rocket-lawyer.com','clio.com','luminance.com','contractpodai.com']
+  },
+  'Media / Publishing': {
+    'United States': ['buzzfeed.com','vox.com','theatlantic.com','condenet.com','hearst.com','meredith.com','nbcuniversal.com','viacom.com','warnermedia.com','axios.com','substack.com'],
+    'United Kingdom': ['bbc.com','guardian.com','times.co.uk','telegraph.co.uk','the-independent.co.uk','dailymail.co.uk','newsuk.com','haymarket.com','future.com'],
+    'UAE': ['empc.ae','motivate.ae','itp.com','anghami.com','shahid.net','mbc.net'],
+    'Global': ['reuters.com','bloomberg.com','associated-press.com','condenet.com','hearst.com','vox.com']
+  },
+  'Manufacturing': {
+    'United States': ['ge.com','3m.com','honeywell.com','emerson.com','parker.com','illinois-tool-works.com','rockwell-automation.com','dover.com','roper-technologies.com','xylem.com'],
+    'Germany': ['siemens.com','bosch.com','basf.com','bayer.com','bmw.com','daimler.com','volkswagen.com','continental.com','schaeffler.com','thyssenkrupp.com'],
+    'UAE': ['ducab.com','aluminiumBahrain.com','emirates-steel.ae','ducab.com','tabreed.ae'],
+    'Global': ['siemens.com','ge.com','honeywell.com','3m.com','bosch.com','emerson.com']
+  },
+  'Retail': {
+    'United States': ['target.com','walmart.com','bestbuy.com','costco.com','nordstrom.com','macys.com','gap.com','lululemon.com','sephora.com','ulta.com','chewy.com','wayfair.com'],
+    'United Kingdom': ['tesco.com','sainsburys.co.uk','marksandspencer.com','next.co.uk','johnlewis.com','primark.com','argos.co.uk','boots.com','superdrug.com'],
+    'UAE': ['luluhypermarket.com','carrefouruae.com','nesto.ae','aster.ae','spinneys.com','waitrose.ae'],
+    'Global': ['zara.com','h-and-m.com','uniqlo.com','ikea.com','primark.com','lululemon.com']
+  }
+};
+
+function getCompaniesForSearch(industry, country, count) {
+  const db = COMPANY_DB[industry];
+  if (!db) return [];
+  // Try specific country first, then Global
+  let list = db[country] || db['Global'] || [];
+  // If country list is too short, merge with Global
+  const global = db['Global'] || [];
+  const merged = [...new Set([...list, ...global])];
+  return merged.slice(0, count);
+}
+
 async function runDiscover() {
   const industry = document.getElementById('d-industry').value;
-  const location = document.getElementById('d-location').value.trim();
-  const size     = document.getElementById('d-size').value;
+  const country  = document.getElementById('d-country').value || 'Global';
   const dept     = document.getElementById('d-dept').value;
-  const keywords = document.getElementById('d-keywords').value.trim();
   const count    = parseInt(document.getElementById('d-count').value) || 10;
   const key      = S.cfg.hunterKey;
   const btn      = document.getElementById('hunt-btn');
 
   if (!industry) { showAlert('hunt-msg','err','Please select an industry.'); return; }
-  if (!key) { showAlert('hunt-msg','err','No Hunter.io key found. Go to Settings and add it first.'); return; }
+  if (!key)      { showAlert('hunt-msg','err','No Hunter.io API key found. Go to Settings → paste your Hunter.io key → Save.'); return; }
+
+  const domains = getCompaniesForSearch(industry, country, count);
+  if (!domains.length) { showAlert('hunt-msg','err','No companies found for this combination. Try a different industry or country.'); return; }
 
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Working…';
+  btn.innerHTML = '<span class="spinner"></span> Searching…';
 
   const progressEl = document.getElementById('discover-progress');
   const labelEl    = document.getElementById('dp-label');
   const barEl      = document.getElementById('dp-bar');
   const coEl       = document.getElementById('dp-companies');
+
   progressEl.style.display = 'block';
-  coEl.innerHTML = '';
-  barEl.style.width = '5%';
-  labelEl.textContent = 'Step 1/2 — Claude AI is finding matching companies…';
+  coEl.innerHTML = domains.map(d => `<span class="tag tag-gray" id="chip-${d.replace(/\./g,'-')}">${d}</span>`).join('');
+  barEl.style.width = '3%';
+  labelEl.textContent = `Searching Hunter.io for contacts at ${domains.length} companies…`;
 
-  try {
-    // ── Step 1: Claude generates real company domains ──
-    const sizeDesc = { startup:'1–10 employees', small:'10–50 employees', medium:'50–200 employees', large:'200–1000 employees', enterprise:'1000+ employees' }[size] || 'any size';
-    const prompt = `You are a B2B prospecting expert. Give me a list of ${count} real companies that match ALL of these criteria:
-- Industry: ${industry}
-- Location: ${location || 'anywhere (global)'}
-- Company size: ${sizeDesc}
-${keywords ? `- Additional keywords: ${keywords}` : ''}
+  let totalAdded = 0;
 
-Requirements:
-- These must be REAL, currently operating companies with real websites
-- Choose companies that are likely to need outbound lead generation services
-- Prefer companies that are active and growing
-- Include a good mix of well-known and mid-tier companies
+  for (let i = 0; i < domains.length; i++) {
+    const domain = domains[i];
+    const chipId = 'chip-' + domain.replace(/\./g,'-');
+    const chip = document.getElementById(chipId);
+    if (chip) chip.className = 'tag tag-amber';
 
-Reply ONLY with valid JSON, no other text:
-{"companies":[{"name":"Company Name","domain":"companydomain.com","description":"one sentence about what they do and why they need lead gen"}]}`;
+    try {
+      let url = `https://api.hunter.io/v2/domain-search?domain=${encodeURIComponent(domain)}&limit=10&api_key=${key}`;
+      if (dept) url += `&department=${dept}`;
 
-    const text = await askClaude(prompt, 1000);
-    const parsed = parseJSON(text);
-    const companies = parsed.companies || [];
+      const res = await fetch(url);
+      const data = await res.json();
+      const emails = data.data?.emails || [];
+      let addedHere = 0;
 
-    if (!companies.length) {
-      showAlert('hunt-msg','err','Claude could not find matching companies. Try different criteria.');
-      progressEl.style.display='none'; return;
-    }
-
-    // Show company chips
-    coEl.innerHTML = companies.map(c =>
-      `<span class="tag tag-gray" id="chip-${c.domain}" style="font-size:11px">${c.name}</span>`
-    ).join('');
-
-    barEl.style.width = '20%';
-    labelEl.textContent = `Step 2/2 — Searching Hunter.io for contacts at ${companies.length} companies…`;
-
-    // ── Step 2: Hunter.io search for each domain ──
-    let totalAdded = 0;
-    let done = 0;
-
-    for (const co of companies) {
-      const chip = document.getElementById('chip-'+co.domain);
-      if (chip) { chip.className='tag tag-amber'; chip.innerHTML=`<span class="spinner" style="border-color:var(--amber);border-top-color:var(--amber);width:10px;height:10px"></span> ${co.name}`; }
-
-      try {
-        let url = `https://api.hunter.io/v2/domain-search?domain=${encodeURIComponent(co.domain)}&limit=10&api_key=${key}`;
-        if (dept) url += `&department=${dept}`;
-        const res = await fetch(url);
-        const data = await res.json();
-        const emails = data.data?.emails || [];
-        let addedHere = 0;
-
-        emails.forEach(e => {
-          if (!S.leads.find(l => l.email===e.value)) {
-            S.leads.push({
-              id: uid(), email: e.value,
-              firstName: e.first_name||'', lastName: e.last_name||'',
-              position: e.position||'', department: e.department||'',
-              company: data.data?.organization || co.name,
-              domain: co.domain, companyDesc: co.description||'',
-              industry, location,
-              score: null, scoreReason: '',
-              stage: 'New', variant: Math.random()>.5?'A':'B',
-              createdAt: new Date().toISOString()
-            });
-            addedHere++; totalAdded++;
-          }
-        });
-
-        if (chip) {
-          chip.className = addedHere>0 ? 'tag tag-green' : 'tag tag-gray';
-          chip.textContent = `${co.name} (${addedHere})`;
+      emails.forEach(e => {
+        if (!S.leads.find(l => l.email === e.value)) {
+          S.leads.push({
+            id: uid(), email: e.value,
+            firstName: e.first_name||'', lastName: e.last_name||'',
+            position: e.position||'', department: e.department||'',
+            company: data.data?.organization || domain,
+            domain, industry, country,
+            score: null, scoreReason: '',
+            stage: 'New', variant: Math.random() > .5 ? 'A' : 'B',
+            createdAt: new Date().toISOString()
+          });
+          addedHere++; totalAdded++;
         }
-      } catch {
-        if (chip) { chip.className='tag tag-red'; chip.textContent=co.name+' ✗'; }
-      }
+      });
 
-      done++;
-      barEl.style.width = Math.round(20 + (done/companies.length)*78) + '%';
-      labelEl.textContent = `Step 2/2 — Searched ${done}/${companies.length} companies… ${totalAdded} contacts found`;
-      dbSave(); renderLeads(); renderDashboard();
+      if (chip) {
+        chip.className = addedHere > 0 ? 'tag tag-green' : 'tag tag-gray';
+        chip.textContent = domain + ' (' + addedHere + ')';
+      }
+    } catch (e) {
+      if (chip) { chip.className = 'tag tag-red'; chip.textContent = domain + ' ✗'; }
     }
 
-    barEl.style.width = '100%';
-    labelEl.textContent = `✓ Done! Found ${totalAdded} new contacts across ${companies.length} companies.`;
-    showAlert('hunt-msg','ok',`Added ${totalAdded} verified contacts from ${companies.length} ${industry} companies${location?' in '+location:''}.`);
+    barEl.style.width = Math.round(((i + 1) / domains.length) * 100) + '%';
+    labelEl.textContent = `Searched ${i+1}/${domains.length} companies — ${totalAdded} contacts found so far…`;
+    dbSave(); renderLeads(); renderDashboard();
+  }
 
-  } catch(err) {
-    showAlert('hunt-msg','err','Something went wrong: ' + (err.message||'Unknown error'));
-    progressEl.style.display='none';
+  barEl.style.width = '100%';
+  labelEl.textContent = `✓ Done — ${totalAdded} verified contacts added from ${domains.length} ${industry} companies${country !== 'Global' ? ' in ' + country : ''}.`;
+
+  if (totalAdded > 0) {
+    showAlert('hunt-msg','ok', `Added ${totalAdded} contacts. Check the lead list below — score them with AI for best results.`);
+  } else {
+    showAlert('hunt-msg','info', 'Hunter.io found 0 new contacts. These domains may not have public emails, or you may have reached your free plan search limit.');
   }
 
   btn.disabled = false;
-  btn.innerHTML = '<i class="ti ti-sparkles"></i> Discover contacts';
+  btn.innerHTML = '<i class="ti ti-search"></i> Find contacts';
 }
-
 function filterLeads(stage, btn) {
   leadStageFilter = stage;
   document.querySelectorAll('#lead-filter-row .filter-pill').forEach(b=>b.classList.remove('active'));
